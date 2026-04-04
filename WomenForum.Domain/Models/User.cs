@@ -11,7 +11,9 @@ public class User : BaseDbEntityWithId
     
     public DateTime BirthDate { get; set; }
     
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    
+    public DateTime? DeletedAt { get; set; }
     
     public DateTime LastLogin { get; set; }
     
@@ -27,7 +29,6 @@ public class User : BaseDbEntityWithId
     
     public VisibilityTypes Visibility { get; set; }
 
-    public Guid UserSettingsId { get; set; }
     public UserSettings UserSettings { get; set; } = null!;
     
     public List<Like> Likes { get; set; } = [];

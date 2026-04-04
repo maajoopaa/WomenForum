@@ -9,9 +9,9 @@ public class Community : BaseDbEntityWithId
 
     public string Description { get; set; } = null!;
     
-    public DateTime CreatedAt { get; set; }
-    
-    public DateTime ChangedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public DateTime ChangedAt { get; set; } = DateTime.UtcNow;
     
     public string? Avatar { get; set; }
     
