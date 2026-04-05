@@ -4,7 +4,7 @@ namespace WomenForum.Domain.Models;
 
 public class Like : BaseDbEntityWithId
 {
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public Guid LikedById { get; set; }
     public User LikedBy { get; set; } = null!;

@@ -1,6 +1,6 @@
 ﻿namespace WomenForum.Domain.Enums;
 
-public enum VisibilityTypes
+public enum VisibilityType
 {
     Public = 1,
     Private

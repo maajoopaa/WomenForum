@@ -11,7 +11,9 @@ public class User : BaseDbEntityWithId
     
     public DateTime BirthDate { get; set; }
     
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    
+    public DateTime? DeletedAt { get; set; }
     
     public DateTime LastLogin { get; set; }
     
@@ -23,11 +25,10 @@ public class User : BaseDbEntityWithId
     
     public string PasswordHash { get; set; } = null!;
     
-    public Roles Role { get; set; }
+    public Role Role { get; set; }
     
-    public VisibilityTypes Visibility { get; set; }
+    public VisibilityType Visibility { get; set; }
 
-    public Guid UserSettingsId { get; set; }
     public UserSettings UserSettings { get; set; } = null!;
     
     public List<Like> Likes { get; set; } = [];
@@ -41,6 +42,8 @@ public class User : BaseDbEntityWithId
     public List<Subscription> Followers { get; set; } = [];
     
     public List<Community> Communities { get; set; } = [];
+    
+    public List<CommunityMember> CommunityMemberships { get; set; } = [];
     
     public List<Post> Posts { get; set; } = [];
     

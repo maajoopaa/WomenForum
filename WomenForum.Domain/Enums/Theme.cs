@@ -1,6 +1,6 @@
 ﻿namespace WomenForum.Domain.Enums;
 
-public enum Themes
+public enum Theme
 {
     Dark,
     Light

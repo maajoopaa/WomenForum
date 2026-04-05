@@ -8,9 +8,9 @@ public class Post : BaseDbEntityWithId
 
     public string HtmlContent { get; set; } = null!;
     
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
-    public DateTime ChangedAt { get; set; }
+    public DateTime ChangedAt { get; set; } = DateTime.UtcNow;
     
     public DateTime? DeletedAt { get; set; }
     
@@ -23,6 +23,4 @@ public class Post : BaseDbEntityWithId
     public List<Like> Likes { get; set; } = [];
 
     public List<Comment> Comments { get; set; } = [];
-    
-    public List<Report> Reports { get; set; } = [];
 }
