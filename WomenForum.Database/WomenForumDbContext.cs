@@ -8,11 +8,15 @@ public class WomenForumDbContext(DbContextOptions<WomenForumDbContext> options) 
     public DbSet<Category> Categories { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<Community> Communities { get; set; }
+    public DbSet<CommunityJoinRequest> CommunityJoinRequests { get; set; }
+    public DbSet<CommunityMember> CommunityMembers { get; set; }
     public DbSet<DiscussionThread> DiscussionThreads { get; set; }
     public DbSet<Like> Likes { get; set; }
     public DbSet<Message> Messages { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<Report> Reports { get; set; }
+    public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<UserSettings> UserSettings { get; set; }
 

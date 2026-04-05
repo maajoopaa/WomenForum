@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WomenForum.Database;
@@ -11,9 +12,11 @@ using WomenForum.Database;
 namespace WomenForum.Database.Migrations
 {
     [DbContext(typeof(WomenForumDbContext))]
-    partial class WomenForumDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260405210809_AddedMissedTables")]
+    partial class AddedMissedTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -216,6 +219,44 @@ namespace WomenForum.Database.Migrations
                     b.HasIndex("CreatedById");
 
                     b.ToTable("DiscussionThreads");
+                });
+
+            modelBuilder.Entity("WomenForum.Domain.Models.DiscussionThreadJoinRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CommunityId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ReviewedById")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CommunityId");
+
+                    b.HasIndex("ReviewedById");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DiscussionThreadJoinRequests");
                 });
 
             modelBuilder.Entity("WomenForum.Domain.Models.Like", b =>
@@ -593,6 +634,31 @@ namespace WomenForum.Database.Migrations
                         .IsRequired();
 
                     b.Navigation("CreatedBy");
+                });
+
+            modelBuilder.Entity("WomenForum.Domain.Models.DiscussionThreadJoinRequest", b =>
+                {
+                    b.HasOne("WomenForum.Domain.Models.Community", "Community")
+                        .WithMany()
+                        .HasForeignKey("CommunityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("WomenForum.Domain.Models.User", "ReviewedBy")
+                        .WithMany()
+                        .HasForeignKey("ReviewedById");
+
+                    b.HasOne("WomenForum.Domain.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Community");
+
+                    b.Navigation("ReviewedBy");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WomenForum.Domain.Models.Like", b =>
