@@ -1,7 +1,11 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using WomenForum.Database;
+using WomenForum.Helpers;
 using WomenForum.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -56,6 +60,12 @@ builder.Services
 builder.Services.AddDbContext<WomenForumDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+//Jwt helper
+builder.Services.AddTransient<JWTHelper>();
+
+//Automapper
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
 //Serilog
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()               
@@ -63,6 +73,24 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 builder.Host.UseSerilog();
+
+//Authorization
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? "");
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,      
+            ValidateIssuerSigningKey = true,  
+            IssuerSigningKey = new SymmetricSecurityKey(key)
+        };
+    });
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
