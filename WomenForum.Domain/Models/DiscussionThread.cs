@@ -9,8 +9,6 @@ public class DiscussionThread : BaseDbEntityWithId
 
     public string Description { get; set; } = null!;
     
-    public VisibilityTypes Visibility { get; set; }
-    
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public DateTime ChangedAt { get; set; } = DateTime.UtcNow;

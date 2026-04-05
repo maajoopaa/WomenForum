@@ -1,8 +1,8 @@
 ﻿namespace WomenForum.Domain.Enums;
 
-public enum Roles
+public enum Role
 {
-    Unknown,
     User,
+    Moderator,
     Administrator
 }

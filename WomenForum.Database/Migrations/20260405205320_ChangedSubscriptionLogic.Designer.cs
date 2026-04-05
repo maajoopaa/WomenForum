@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WomenForum.Database;
@@ -11,9 +12,11 @@ using WomenForum.Database;
 namespace WomenForum.Database.Migrations
 {
     [DbContext(typeof(WomenForumDbContext))]
-    partial class WomenForumDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260405205320_ChangedSubscriptionLogic")]
+    partial class ChangedSubscriptionLogic
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -295,11 +298,17 @@ namespace WomenForum.Database.Migrations
                     b.Property<Guid?>("PostId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("PostId1")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("ReportedById")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime?>("ResolvedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Source")
+                        .HasColumnType("integer");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -315,6 +324,8 @@ namespace WomenForum.Database.Migrations
                     b.HasIndex("CommunityId");
 
                     b.HasIndex("PostId");
+
+                    b.HasIndex("PostId1");
 
                     b.HasIndex("ReportedById");
 
@@ -567,7 +578,12 @@ namespace WomenForum.Database.Migrations
 
                     b.HasOne("WomenForum.Domain.Models.Post", "Post")
                         .WithMany()
-                        .HasForeignKey("PostId");
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("WomenForum.Domain.Models.Post", null)
+                        .WithMany("Reports")
+                        .HasForeignKey("PostId1");
 
                     b.HasOne("WomenForum.Domain.Models.User", "ReportedBy")
                         .WithMany("Reports")
@@ -646,6 +662,8 @@ namespace WomenForum.Database.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("Likes");
+
+                    b.Navigation("Reports");
                 });
 
             modelBuilder.Entity("WomenForum.Domain.Models.User", b =>

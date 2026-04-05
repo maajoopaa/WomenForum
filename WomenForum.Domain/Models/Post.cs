@@ -23,6 +23,4 @@ public class Post : BaseDbEntityWithId
     public List<Like> Likes { get; set; } = [];
 
     public List<Comment> Comments { get; set; } = [];
-    
-    public List<Report> Reports { get; set; } = [];
 }

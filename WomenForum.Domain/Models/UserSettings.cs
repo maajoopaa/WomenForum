@@ -5,7 +5,7 @@ namespace WomenForum.Domain.Models;
 
 public class UserSettings : BaseDbEntityWithId
 {
-    public Themes Theme { get; set; }
+    public Theme Theme { get; set; }
     
     public Guid UserId { get; set; }
 

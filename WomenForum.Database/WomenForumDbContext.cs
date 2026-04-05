@@ -19,7 +19,20 @@ public class WomenForumDbContext(DbContextOptions<WomenForumDbContext> options) 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Username)
+            .IsUnique();
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Email)
+            .IsUnique();
+
+        modelBuilder.Entity<User>()
+            .HasOne(u => u.UserSettings)
+            .WithOne(s => s.User)
+            .HasForeignKey<UserSettings>(s => s.UserId);
+
         modelBuilder.Entity<Subscription>()
             .HasOne(s => s.Subscriber)
             .WithMany(u => u.Following)
@@ -31,38 +44,107 @@ public class WomenForumDbContext(DbContextOptions<WomenForumDbContext> options) 
             .WithMany(u => u.Followers)
             .HasForeignKey(s => s.TargetUserId)
             .OnDelete(DeleteBehavior.Restrict);
-        
+
         modelBuilder.Entity<Subscription>()
-            .HasOne(s => s.TargetCommunity)
-            .WithMany(c => c.Followers)
-            .HasForeignKey(s => s.TargetCommunityId)
+            .HasIndex(s => new { s.SubscriberId, s.TargetUserId })
+            .IsUnique();
+
+        modelBuilder.Entity<CommunityMember>()
+            .HasOne(cm => cm.User)
+            .WithMany(u => u.CommunityMemberships)
+            .HasForeignKey(cm => cm.UserId)
             .OnDelete(DeleteBehavior.Restrict);
-        
+
+        modelBuilder.Entity<CommunityMember>()
+            .HasOne(cm => cm.Community)
+            .WithMany(c => c.Members)
+            .HasForeignKey(cm => cm.CommunityId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<CommunityMember>()
+            .HasIndex(cm => new { cm.UserId, cm.CommunityId })
+            .IsUnique();
+
+        modelBuilder.Entity<Community>()
+            .HasOne(c => c.CreatedBy)
+            .WithMany(u => u.Communities)
+            .HasForeignKey(c => c.CreatedById)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Community>()
+            .HasOne(c => c.Category)
+            .WithMany()
+            .HasForeignKey(c => c.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Post>()
+            .HasOne(p => p.AuthorUser)
+            .WithMany(u => u.Posts)
+            .HasForeignKey(p => p.AuthorUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Post>()
+            .HasOne(p => p.Community)
+            .WithMany(c => c.Posts)
+            .HasForeignKey(p => p.CommunityId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Comment>()
+            .HasOne(c => c.CreatedBy)
+            .WithMany(u => u.Comments)
+            .HasForeignKey(c => c.CreatedById)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Comment>()
+            .HasOne(c => c.Post)
+            .WithMany(p => p.Comments)
+            .HasForeignKey(c => c.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Message>()
+            .HasOne(m => m.CreatedBy)
+            .WithMany(u => u.Messages)
+            .HasForeignKey(m => m.CreatedById)
+            .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<Message>()
             .HasOne(m => m.ParentMessage)
             .WithMany(m => m.Replies)
             .HasForeignKey(m => m.ParentMessageId)
             .OnDelete(DeleteBehavior.Restrict);
-        
+
+        modelBuilder.Entity<Message>()
+            .HasOne(m => m.DiscussionThread)
+            .WithMany(t => t.Messages)
+            .HasForeignKey(m => m.DiscussionThreadId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Like>()
+            .HasOne(l => l.LikedBy)
+            .WithMany(u => u.Likes)
+            .HasForeignKey(l => l.LikedById)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Like>()
+            .HasOne(l => l.Post)
+            .WithMany(p => p.Likes)
+            .HasForeignKey(l => l.PostId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         modelBuilder.Entity<Like>()
             .HasIndex(l => new { l.LikedById, l.PostId })
             .IsUnique();
-        
-        modelBuilder.Entity<User>()
-            .HasIndex(u => u.Username)
-            .IsUnique();
-        
-        modelBuilder.Entity<User>()
-            .HasIndex(u => u.Email)
-            .IsUnique();
-        
-        modelBuilder.Entity<Subscription>()
-            .HasCheckConstraint(
-                "CK_Subscription_Target",
-                    @"(
-                (""TargetUserId"" IS NOT NULL AND ""TargetCommunityId"" IS NULL)
-                OR
-                (""TargetUserId"" IS NULL AND ""TargetCommunityId"" IS NOT NULL)
-            )");
+
+        modelBuilder.Entity<Report>()
+            .HasOne(r => r.ReportedBy)
+            .WithMany(u => u.Reports)
+            .HasForeignKey(r => r.ReportedById)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<DiscussionThread>()
+            .HasOne(t => t.CreatedBy)
+            .WithMany()
+            .HasForeignKey(t => t.CreatedById)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

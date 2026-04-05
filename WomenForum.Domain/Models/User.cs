@@ -25,9 +25,9 @@ public class User : BaseDbEntityWithId
     
     public string PasswordHash { get; set; } = null!;
     
-    public Roles Role { get; set; }
+    public Role Role { get; set; }
     
-    public VisibilityTypes Visibility { get; set; }
+    public VisibilityType Visibility { get; set; }
 
     public UserSettings UserSettings { get; set; } = null!;
     
@@ -42,6 +42,8 @@ public class User : BaseDbEntityWithId
     public List<Subscription> Followers { get; set; } = [];
     
     public List<Community> Communities { get; set; } = [];
+    
+    public List<CommunityMember> CommunityMemberships { get; set; } = [];
     
     public List<Post> Posts { get; set; } = [];
     
