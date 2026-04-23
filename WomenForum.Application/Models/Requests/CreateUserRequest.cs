@@ -12,5 +12,7 @@ public class CreateUserRequest
     
     public string Password { get; set; } = null!;
     
+    public string ConfirmPassword { get; set; } = null!;
+    
     public DateTime BirthDate { get; set; }
 }

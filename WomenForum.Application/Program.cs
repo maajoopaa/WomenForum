@@ -1,4 +1,6 @@
 using System.Text;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -7,6 +9,10 @@ using Serilog;
 using WomenForum.Database;
 using WomenForum.Helpers;
 using WomenForum.Middlewares;
+using WomenForum.Repository;
+using WomenForum.Repository.Repositories;
+using WomenForum.Repository.Repositories.Interfaces;
+using WomenForum.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,11 +66,34 @@ builder.Services
 builder.Services.AddDbContext<WomenForumDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+//Repositories
+builder.Services.AddTransient<ICategoriesRepository,CategoriesRepository>();
+builder.Services.AddTransient<ICommentsRepository,CommentsRepository>();
+builder.Services.AddTransient<ICommunitiesRepository,CommunitiesRepository>();
+builder.Services.AddTransient<ICommunityJoinRequestsRepository,CommunityJoinRequestsRepository>();
+builder.Services.AddTransient<ICommunityMembersRepository,CommunityMembersRepository>();
+builder.Services.AddTransient<IDiscussionThreadsRepository,DiscussionThreadsRepository>();
+builder.Services.AddTransient<ILikesRepository,LikesRepository>();
+builder.Services.AddTransient<IMessagesRepository,MessagesRepository>();
+builder.Services.AddTransient<INotificationsRepository,NotificationsRepository>();
+builder.Services.AddTransient<IPostsRepository,PostsRepository>();
+builder.Services.AddTransient<IReportsRepository,ReportsRepository>();
+builder.Services.AddTransient<ISubscriptionsRepository,SubscriptionsRepository>();
+builder.Services.AddTransient<IUserSettingsRepository,UserSettingsRepository>();
+builder.Services.AddTransient<IUsersRepository,UsersRepository>();
+
+//Unit of work
+builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+
 //Jwt helper
 builder.Services.AddTransient<JWTHelper>();
 
 //Automapper
 builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+//Validators
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 
 //Serilog
 Log.Logger = new LoggerConfiguration()
