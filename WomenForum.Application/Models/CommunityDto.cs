@@ -23,8 +23,4 @@ public class CommunityDto : BaseDtoWithId
     public CategoryDto Category { get; set; } = null!;
     
     public UserDto CreatedBy { get; set; } = null!;
-    
-    public List<PostDto> Posts { get; set; } = [];
-    
-    public List<CommunityMemberDto> Members { get; set; } = [];
 }

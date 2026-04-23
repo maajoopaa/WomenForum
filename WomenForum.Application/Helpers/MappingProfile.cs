@@ -15,9 +15,15 @@ public class MappingProfile : Profile
         
         CreateMap<CreateCommunityRequest, Community>();
         
+        CreateMap<CreateCommentRequest, Comment>();
+        
+        CreateMap<CreateMessageRequest, Message>();
+        
         CreateMap<CreateDiscussionThreadRequest, DiscussionThread>();
         
         CreateMap<CreatePostRequest, Post>();
+        
+        CreateMap<CreateReportRequest, Report>();
 
         CreateMap<User, UserDto>()
             .ForMember(x => x.FollowingCount, y => y.MapFrom(z => z.Following.Count))

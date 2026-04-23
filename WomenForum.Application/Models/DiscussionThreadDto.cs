@@ -15,6 +15,4 @@ public class DiscussionThreadDto : BaseDtoWithId
     public DateTime? DeletedAt { get; set; }
     
     public UserDto CreatedBy { get; set; } = null!;
-
-    public List<MessageDto> Messages { get; set; } = [];
 }

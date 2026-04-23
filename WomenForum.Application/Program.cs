@@ -64,7 +64,9 @@ builder.Services
 
 //Database
 builder.Services.AddDbContext<WomenForumDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options
+        .UseLazyLoadingProxies()
+        .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 //Repositories
 builder.Services.AddTransient<ICategoriesRepository,CategoriesRepository>();
