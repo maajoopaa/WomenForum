@@ -3,6 +3,7 @@ using Templates.Business;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Models;
 using WomenForum.Exceptions;
+using WomenForum.Helpers.Interfaces;
 using WomenForum.Models;
 using WomenForum.Models.Requests;
 using WomenForum.Repository;
@@ -14,16 +15,19 @@ public class CommentsBusinessService : BaseBusinessService, ICommentsBusinessSer
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ILogger<CommentsBusinessService> _logger;
+    private readonly IPermissionsService _permissionsService;
 
     public CommentsBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        ILogger<CommentsBusinessService> logger) : base(httpContextAccessor)
+        ILogger<CommentsBusinessService> logger,
+        IPermissionsService permissionsService) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
+        _permissionsService = permissionsService;
     }
 
     public async Task<CommentDto> AddCommentAsync(Guid postId, CreateCommentRequest request, CancellationToken cancellationToken)
@@ -49,6 +53,14 @@ public class CommentsBusinessService : BaseBusinessService, ICommentsBusinessSer
 
     public async Task UpdateCommentAsync(Guid commentId, UpdateCommentRequest request, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("comments", UserId, commentId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Write))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entity = await  _unitOfWork.CommentsRepository.GetByIdAsync(commentId, cancellationToken);
 
         if (entity == null)
@@ -65,6 +77,14 @@ public class CommentsBusinessService : BaseBusinessService, ICommentsBusinessSer
 
     public async Task DeleteCommentAsync(Guid commentId, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("comments", UserId, commentId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Delete))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entity = await  _unitOfWork.CommentsRepository.GetByIdAsync(commentId, cancellationToken);
 
         if (entity == null)

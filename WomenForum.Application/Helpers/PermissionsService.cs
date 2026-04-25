@@ -30,45 +30,62 @@ public class PermissionsService : IPermissionsService
             return _allPermissionsList;
         }
         
+        if (user.Role is Role.Moderator)
+        {
+            return [PermissionTypes.Read,PermissionTypes.Write];
+        }
+        
         resourceType = resourceType.ToLower();
         switch (resourceType)
         {
             case "categories":
-                return user.Role is Role.Moderator ? [PermissionTypes.Read,PermissionTypes.Write] : ([PermissionTypes.Read]);
+                return [PermissionTypes.Read];
 
             case "comments":
-                if (user.Role is Role.Moderator)
-                {
-                    return [PermissionTypes.Read,PermissionTypes.Write];
-                }
-                
                 var comment = await _unitOfWork.CommentsRepository.GetByIdAsync(resourceId,cancellationToken);
 
                 return comment?.CreatedById == userId ? _allPermissionsList : [PermissionTypes.Read];
 
             case "communities":
-                if (user.Role is Role.Moderator)
-                {
-                    return [PermissionTypes.Read,PermissionTypes.Write];
-                }
-                
                 var community = await _unitOfWork.CommunitiesRepository.GetByIdAsync(resourceId, cancellationToken);
+                
+                var communityMember = community?.Members?.FirstOrDefault(x => x.UserId == userId);
+                
+                if (communityMember?.Role is CommunityRole.Owner or CommunityRole.Admin)
+                    return _allPermissionsList;
 
-                if (community?.CreatedById == userId)
+                if (communityMember?.Role == CommunityRole.Moderator)
+                    return [PermissionTypes.Read, PermissionTypes.Write];
+
+                if (communityMember?.Role == CommunityRole.Member || community?.Visibility == VisibilityType.Public)
+                {
+                    return [PermissionTypes.Read];
+                }
+
+                return [];
+            
+            case "community-members":
+                var resourceMember = await _unitOfWork.CommunityMembersRepository.GetByIdAsync(resourceId, cancellationToken);
+
+                if (resourceMember == null)
+                    return [];
+                
+                var resourceCommunity =
+                    await _unitOfWork.CommunitiesRepository.GetByIdAsync(resourceMember.CommunityId, cancellationToken);
+
+                var currentResourceMember = resourceCommunity?.Members.FirstOrDefault(x => x.UserId == userId);
+
+                if (currentResourceMember == null)
+                {
+                    return [];
+                }
+
+                if (currentResourceMember.Role > resourceMember.Role)
                 {
                     return _allPermissionsList;
                 }
-                
-                var communityMember = community?.Members.FirstOrDefault(x => x.UserId == userId);
-                
-                if (communityMember == null)
-                    return [PermissionTypes.Read];
-                
-                if (communityMember.Role is CommunityRole.Owner or CommunityRole.Admin)
-                    return _allPermissionsList;
 
-                return [PermissionTypes.Read, PermissionTypes.Write];
-
+                return [PermissionTypes.Read];
             case "threads":
                 if (user.Role is Role.Moderator)
                 {
@@ -103,8 +120,19 @@ public class PermissionsService : IPermissionsService
                 return user.Role == Role.Moderator ? _allPermissionsList : [];
 
             case "users":
-                return userId == resourceId ? _allPermissionsList : [PermissionTypes.Read];
+                if (userId == resourceId)
+                {
+                    return _allPermissionsList;
+                }
+                
+                var resource = await _unitOfWork.UsersRepository.GetByIdAsync(resourceId, cancellationToken);
 
+                if (resource?.Followers.FirstOrDefault(x => x.Id == userId) != null || resource?.Visibility == VisibilityType.Public)
+                {
+                    return [PermissionTypes.Read];
+                }
+
+                return [];
             default:
                 return [];
         }

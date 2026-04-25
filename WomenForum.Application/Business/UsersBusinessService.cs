@@ -4,6 +4,7 @@ using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Enums;
 using WomenForum.Domain.Models;
 using WomenForum.Exceptions;
+using WomenForum.Helpers.Interfaces;
 using WomenForum.Models;
 using WomenForum.Models.Requests;
 using WomenForum.Repository;
@@ -15,20 +16,31 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ILogger<UsersBusinessService> _logger;
+    private readonly IPermissionsService _permissionsService;
 
     public UsersBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        ILogger<UsersBusinessService> logger) : base(httpContextAccessor)
+        ILogger<UsersBusinessService> logger,
+        IPermissionsService permissionsService) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
+        _permissionsService = permissionsService;
     }
 
     public async Task UpdateUserAsync(Guid userId, UpdateUserRequest request, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("users", UserId, userId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Write))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entity = await _unitOfWork.UsersRepository.GetByIdAsync(userId, cancellationToken);
 
         if (entity == null)
@@ -50,6 +62,14 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
 
     public async Task UpdateUserVisibilityAsync(Guid userId, VisibilityType visibility, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("users", UserId, userId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Write))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entity = await _unitOfWork.UsersRepository.GetByIdAsync(userId, cancellationToken);
 
         if (entity == null)
@@ -71,6 +91,14 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
 
         foreach (var entity in entities)
         {
+            var permissions =
+                await _permissionsService.GetUserPermissionsAsync("users", UserId, entity.Id, cancellationToken);
+
+            if (!permissions.Contains(PermissionTypes.Delete))
+            {
+                throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+            }
+            
             entity.DeletedAt = DateTime.UtcNow;
         }
 
@@ -105,6 +133,14 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
 
     public async Task<List<SubscriptionDto>> GetSubscriptionsByUserIdAsync(Guid userId, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("users", UserId, userId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Read))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entities = await _unitOfWork.SubscriptionsRepository.GetAsync(x =>
             x.SubscriberId == userId, cancellationToken);
 
@@ -113,6 +149,14 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
 
     public async Task<List<SubscriptionDto>> GetSubscribersByUserIdAsync(Guid userId, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("users", UserId, userId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Read))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entities = await _unitOfWork.SubscriptionsRepository.GetAsync(x =>
             x.TargetUserId == userId, cancellationToken);
 

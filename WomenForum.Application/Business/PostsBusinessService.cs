@@ -3,6 +3,7 @@ using Templates.Business;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Models;
 using WomenForum.Exceptions;
+using WomenForum.Helpers.Interfaces;
 using WomenForum.Models;
 using WomenForum.Models.Requests;
 using WomenForum.Repository;
@@ -14,16 +15,19 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ILogger<PostsBusinessService> _logger;
+    private readonly IPermissionsService _permissionsService;
 
     public PostsBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        ILogger<PostsBusinessService> logger) : base(httpContextAccessor)
+        ILogger<PostsBusinessService> logger,
+        IPermissionsService permissionsService) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
+        _permissionsService = permissionsService;
     }
 
     public async Task<PostDto> AddPostAsync(CreatePostRequest request, CancellationToken cancellationToken)
@@ -57,6 +61,14 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
 
     public async Task UpdatePostAsync(Guid postId, UpdatePostRequest request, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("posts", UserId, postId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Write))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entity = await _unitOfWork.PostsRepository.GetByIdAsync(postId, cancellationToken);
 
         if (entity == null)
@@ -75,6 +87,14 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
 
     public async Task DeletePostAsync(Guid postId, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("posts", UserId, postId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Delete))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entity = await _unitOfWork.PostsRepository.GetByIdAsync(postId, cancellationToken);
 
         if (entity == null)
@@ -91,6 +111,14 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
 
     public async Task<List<PostDto>> GetPostsByCommunityIdAsync(Guid communityId, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("communities", UserId, communityId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Read))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entities = await _unitOfWork.PostsRepository.GetAsync(x =>
             x.CommunityId == communityId, cancellationToken);
 
@@ -99,6 +127,14 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
 
     public async Task<List<PostDto>> GetPostsByUserIdAsync(Guid userId, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("users", UserId, userId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Read))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entities = await _unitOfWork.PostsRepository.GetAsync(x =>
             x.AuthorUserId == userId, cancellationToken);
 

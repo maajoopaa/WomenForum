@@ -3,6 +3,7 @@ using Templates.Business;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Enums;
 using WomenForum.Exceptions;
+using WomenForum.Helpers.Interfaces;
 using WomenForum.Models;
 using WomenForum.Repository;
 
@@ -13,20 +14,31 @@ public class CommunityMembersBusinessService : BaseBusinessService, ICommunityMe
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ILogger<CommunityMembersBusinessService> _logger;
+    private readonly IPermissionsService _permissionsService;
 
     public CommunityMembersBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        ILogger<CommunityMembersBusinessService> logger) : base(httpContextAccessor)
+        ILogger<CommunityMembersBusinessService> logger,
+        IPermissionsService permissionsService) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
+        _permissionsService = permissionsService;
     }
 
     public async Task ChangeBanStatusCommunityMemberAsync(Guid memberId, bool isBanned, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("community-members", UserId, memberId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Write))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entity = await _unitOfWork.CommunityMembersRepository.GetByIdAsync(memberId,cancellationToken);
 
         if (entity == null)
@@ -45,6 +57,17 @@ public class CommunityMembersBusinessService : BaseBusinessService, ICommunityMe
     {
         var entities = await _unitOfWork.CommunityMembersRepository.GetAsync(x =>
             memberIds.Contains(x.Id), cancellationToken);
+
+        foreach (var member in entities)
+        {
+            var permissions =
+                await _permissionsService.GetUserPermissionsAsync("community-members", UserId, member.Id, cancellationToken);
+
+            if (!permissions.Contains(PermissionTypes.Delete))
+            {
+                throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+            }
+        }
         
         await _unitOfWork.CommunityMembersRepository.DeleteRangeAsync(entities, cancellationToken);
         
@@ -53,6 +76,14 @@ public class CommunityMembersBusinessService : BaseBusinessService, ICommunityMe
 
     public async Task ChangeCommunityMemberRoleAsync(Guid memberId, CommunityRole role, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("community-members", UserId, memberId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Write))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entity = await _unitOfWork.CommunityMembersRepository.GetByIdAsync(memberId,cancellationToken);
 
         if (entity == null)
@@ -69,6 +100,14 @@ public class CommunityMembersBusinessService : BaseBusinessService, ICommunityMe
 
     public async Task<List<CommunityMemberDto>> GetCommunityMembersByCommunityIdAsync(Guid communityId, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("communities", UserId, communityId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Read))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entities =
             await _unitOfWork.CommunityMembersRepository.GetAsync(x =>
                 x.CommunityId == communityId, cancellationToken);

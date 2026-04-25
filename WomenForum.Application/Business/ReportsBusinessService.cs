@@ -4,6 +4,7 @@ using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Enums;
 using WomenForum.Domain.Models;
 using WomenForum.Exceptions;
+using WomenForum.Helpers.Interfaces;
 using WomenForum.Models;
 using WomenForum.Models.Requests;
 using WomenForum.Repository;
@@ -15,16 +16,19 @@ public class ReportsBusinessService : BaseBusinessService, IReportsBusinessServi
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ILogger<ReportsBusinessService> _logger;
+    private readonly IPermissionsService _permissionsService;
 
     public ReportsBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        ILogger<ReportsBusinessService> logger) : base(httpContextAccessor)
+        ILogger<ReportsBusinessService> logger,
+        IPermissionsService permissionsService) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
+        _permissionsService = permissionsService;
     }
 
     public async Task<ReportDto> AddReportAsync(CreateReportRequest request, CancellationToken cancellationToken)
@@ -78,6 +82,8 @@ public class ReportsBusinessService : BaseBusinessService, IReportsBusinessServi
                 throw new NotFoundException("Цель жалобы не найдена.");
             }
         }
+
+        entity.ReportedById = UserId;
         
         await _unitOfWork.ReportsRepository.AddAsync(entity, cancellationToken);
         
@@ -88,6 +94,14 @@ public class ReportsBusinessService : BaseBusinessService, IReportsBusinessServi
 
     public async Task ChangeReportStatusAsync(Guid reportId, ReportStatus status, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("reports", UserId, reportId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Write))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entity = await _unitOfWork.ReportsRepository.GetByIdAsync(reportId, cancellationToken);
 
         if (entity == null)
@@ -104,6 +118,14 @@ public class ReportsBusinessService : BaseBusinessService, IReportsBusinessServi
 
     public async Task<List<ReportDto>> GetAllReportsAsync(CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("reports", UserId, Guid.Empty, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Read))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entities = await _unitOfWork.ReportsRepository.GetAsync(null, cancellationToken);
 
         return _mapper.Map<List<ReportDto>>(entities);

@@ -32,6 +32,14 @@ public class CategoriesBusinessService : BaseBusinessService,ICategoriesBusiness
 
     public async Task<CategoryDto> AddCategoryAsync(CreateCategoryRequest request, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("categories", UserId, Guid.Empty, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Write))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entity = _mapper.Map<Category>(request);
         
         await _unitOfWork.CategoriesRepository.AddAsync(entity,cancellationToken);
@@ -50,6 +58,14 @@ public class CategoriesBusinessService : BaseBusinessService,ICategoriesBusiness
 
     public async Task UpdateCategoryAsync(Guid categoryId, UpdateCategoryRequest request, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("categories", UserId, categoryId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Write))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entity = await _unitOfWork.CategoriesRepository.GetByIdAsync(categoryId, cancellationToken);
 
         if (entity == null)

@@ -4,6 +4,7 @@ using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Enums;
 using WomenForum.Domain.Models;
 using WomenForum.Exceptions;
+using WomenForum.Helpers.Interfaces;
 using WomenForum.Models;
 using WomenForum.Repository;
 
@@ -14,16 +15,19 @@ public class CommunityJoinRequestsBusinessService : BaseBusinessService, ICommun
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ILogger<CommunityJoinRequestsBusinessService> _logger;
+    private readonly IPermissionsService _permissionsService;
 
     public CommunityJoinRequestsBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        ILogger<CommunityJoinRequestsBusinessService> logger) : base(httpContextAccessor)
+        ILogger<CommunityJoinRequestsBusinessService> logger,
+        IPermissionsService permissionsService) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
+        _permissionsService = permissionsService;
     }
 
     public async Task JoinCommunityAsync(Guid communityId, CancellationToken cancellationToken)
@@ -63,6 +67,14 @@ public class CommunityJoinRequestsBusinessService : BaseBusinessService, ICommun
 
     public async Task<List<CommunityJoinRequestDto>> GetJoinRequestsByCommunityIdAsync(Guid communityId, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("communities", UserId, communityId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Write))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entities = await _unitOfWork.CommunityJoinRequestsRepository.GetAsync(x =>
             x.CommunityId == communityId, cancellationToken);
         
@@ -77,6 +89,14 @@ public class CommunityJoinRequestsBusinessService : BaseBusinessService, ICommun
         if (entity == null)
         {
             throw new NotFoundException($"Запрос {requestId} не найден.");
+        }
+        
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("communities", UserId, entity.CommunityId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Write))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
         }
         
         entity.Status = status;

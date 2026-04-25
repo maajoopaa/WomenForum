@@ -4,6 +4,7 @@ using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Enums;
 using WomenForum.Domain.Models;
 using WomenForum.Exceptions;
+using WomenForum.Helpers.Interfaces;
 using WomenForum.Models;
 using WomenForum.Models.Requests;
 using WomenForum.Repository;
@@ -15,16 +16,19 @@ public class CommunitiesBusinessService : BaseBusinessService, ICommunitiesBusin
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly ILogger<CommunitiesBusinessService> _logger;
+    private readonly IPermissionsService _permissionsService;
 
     public CommunitiesBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        ILogger<CommunitiesBusinessService> logger) : base(httpContextAccessor)
+        ILogger<CommunitiesBusinessService> logger,
+        IPermissionsService permissionsService) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
+        _permissionsService = permissionsService;
     }
 
     public async Task<CommunityDto> AddCommunityAsync(CreateCommunityRequest request, CancellationToken cancellationToken)
@@ -43,12 +47,29 @@ public class CommunitiesBusinessService : BaseBusinessService, ICommunitiesBusin
         await _unitOfWork.CommunitiesRepository.AddAsync(community, cancellationToken);
         
         _logger.LogInformation("Community successfully added");
+
+        var communityMember = new CommunityMember
+        {
+            CommunityId = community.Id,
+            UserId = UserId,
+            Role = CommunityRole.Owner
+        };
+
+        await _unitOfWork.CommunityMembersRepository.AddAsync(communityMember, cancellationToken);
         
         return _mapper.Map<CommunityDto>(community);
     }
 
     public async Task UpdateCommunityAsync(Guid communityId, UpdateCommunityRequest request, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("communities", UserId, communityId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Write))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entity = await _unitOfWork.CommunitiesRepository.GetByIdAsync(communityId, cancellationToken);
 
         if (entity == null)
@@ -76,6 +97,14 @@ public class CommunitiesBusinessService : BaseBusinessService, ICommunitiesBusin
 
     public async Task DeleteCommunityAsync(Guid communityId, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("communities", UserId, communityId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Delete))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entity = await _unitOfWork.CommunitiesRepository.GetByIdAsync(communityId, cancellationToken);
 
         if (entity == null)
@@ -125,6 +154,14 @@ public class CommunitiesBusinessService : BaseBusinessService, ICommunitiesBusin
 
     public async Task ChangeCommunityVisibilityAsync(Guid communityId, VisibilityType visibility, CancellationToken cancellationToken)
     {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("communities", UserId, communityId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Write))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var entity = await _unitOfWork.CommunitiesRepository.GetByIdAsync(communityId, cancellationToken);
 
         if (entity == null)
