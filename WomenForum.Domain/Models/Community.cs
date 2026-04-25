@@ -20,12 +20,12 @@ public class Community : BaseDbEntityWithId
     public VisibilityType Visibility { get; set; }
 
     public Guid CategoryId { get; set; }
-    public Category Category { get; set; } = null!;
+    public virtual Category Category { get; set; } = null!;
     
     public Guid CreatedById { get; set; }
-    public User CreatedBy { get; set; } = null!;
+    public virtual User CreatedBy { get; set; } = null!;
     
-    public List<Post> Posts { get; set; } = [];
+    public virtual List<Post> Posts { get; set; } = [];
     
-    public List<CommunityMember> Members { get; set; } = [];
+    public virtual List<CommunityMember> Members { get; set; } = [];
 }

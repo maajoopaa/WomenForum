@@ -9,13 +9,13 @@ public class Message : BaseDbEntityWithId
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public Guid CreatedById { get; set; }
-    public User CreatedBy { get; set; } = null!;
+    public virtual User CreatedBy { get; set; } = null!;
     
     public Guid DiscussionThreadId { get; set; }
-    public DiscussionThread DiscussionThread { get; set; } = null!;
+    public virtual DiscussionThread DiscussionThread { get; set; } = null!;
     
     public Guid? ParentMessageId { get; set; }
-    public Message? ParentMessage { get; set; }
+    public virtual Message? ParentMessage { get; set; }
     
-    public List<Message> Replies { get; set; } = [];
+    public virtual List<Message> Replies { get; set; } = [];
 }

@@ -13,13 +13,13 @@ public class DiscussionThreadsBusinessService : BaseBusinessService, IDiscussion
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
-    private readonly ILogger _logger;
+    private readonly ILogger<DiscussionThreadsBusinessService> _logger;
 
     public DiscussionThreadsBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        ILogger logger) : base(httpContextAccessor)
+        ILogger<DiscussionThreadsBusinessService> logger) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;

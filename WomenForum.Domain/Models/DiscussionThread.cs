@@ -16,7 +16,7 @@ public class DiscussionThread : BaseDbEntityWithId
     public DateTime? DeletedAt { get; set; }
     
     public Guid CreatedById { get; set; }
-    public User CreatedBy { get; set; } = null!;
+    public virtual User CreatedBy { get; set; } = null!;
 
-    public List<Message> Messages { get; set; } = [];
+    public virtual List<Message> Messages { get; set; } = [];
 }

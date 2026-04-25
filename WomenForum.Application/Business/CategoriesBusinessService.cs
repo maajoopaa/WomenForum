@@ -3,6 +3,7 @@ using Templates.Business;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Models;
 using WomenForum.Exceptions;
+using WomenForum.Helpers.Interfaces;
 using WomenForum.Models;
 using WomenForum.Models.Requests;
 using WomenForum.Repository;
@@ -13,17 +14,20 @@ public class CategoriesBusinessService : BaseBusinessService,ICategoriesBusiness
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
-    private readonly ILogger _logger;
+    private readonly ILogger<CategoriesBusinessService> _logger;
+    private readonly IPermissionsService _permissionsService;
 
     public CategoriesBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        ILogger logger) : base(httpContextAccessor)
+        ILogger<CategoriesBusinessService> logger,
+        IPermissionsService permissionsService) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
+        _permissionsService = permissionsService;
     }
 
     public async Task<CategoryDto> AddCategoryAsync(CreateCategoryRequest request, CancellationToken cancellationToken)

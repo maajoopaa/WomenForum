@@ -38,8 +38,4 @@
       <ProjectReference Include="..\WomenForum.Repository\WomenForum.Repository.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Controllers\" />
-    </ItemGroup>
-
 </Project>

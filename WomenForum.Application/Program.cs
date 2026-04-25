@@ -1,3 +1,4 @@
+using System.Security;
 using System.Text;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -6,8 +7,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using WomenForum.Business;
+using WomenForum.Business.Interfaces;
 using WomenForum.Database;
 using WomenForum.Helpers;
+using WomenForum.Helpers.Interfaces;
 using WomenForum.Middlewares;
 using WomenForum.Repository;
 using WomenForum.Repository.Repositories;
@@ -86,6 +90,22 @@ builder.Services.AddTransient<IUsersRepository,UsersRepository>();
 
 //Unit of work
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+
+//Business
+builder.Services.AddTransient<IAuthorizationBusinessService, AuthorizationBusinessService>();
+builder.Services.AddTransient<ICategoriesBusinessService, CategoriesBusinessService>();
+builder.Services.AddTransient<ICommentsBusinessService, CommentsBusinessService>();
+builder.Services.AddTransient<ICommunitiesBusinessService, CommunitiesBusinessService>();
+builder.Services.AddTransient<ICommunityJoinRequestsBusinessService, CommunityJoinRequestsBusinessService>();
+builder.Services.AddTransient<ICommunityMembersBusinessService, CommunityMembersBusinessService>();
+builder.Services.AddTransient<IDiscussionThreadsBusinessService, DiscussionThreadsBusinessService>();
+builder.Services.AddTransient<ILikesBusinessService, LikesBusinessService>();
+builder.Services.AddTransient<IMessagesBusinessService, MessagesBusinessService>();
+builder.Services.AddTransient<IPostsBusinessService, PostsBusinessService>();
+builder.Services.AddTransient<IReportsBusinessService, ReportsBusinessService>();
+builder.Services.AddTransient<IUsersBusinessService, UsersBusinessService>();
+builder.Services.AddTransient<IUserSettingsBusinessService, UserSettingsBusinessService>();
+builder.Services.AddTransient<IPermissionsService, PermissionsService>();
 
 //Jwt helper
 builder.Services.AddTransient<JWTHelper>();

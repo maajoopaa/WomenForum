@@ -12,13 +12,13 @@ public class LikesBusinessService : BaseBusinessService, ILikesBusinessService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
-    private readonly ILogger _logger;
+    private readonly ILogger<LikesBusinessService> _logger;
 
     public LikesBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        ILogger logger) : base(httpContextAccessor)
+        ILogger<LikesBusinessService> logger) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;

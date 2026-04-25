@@ -13,13 +13,13 @@ public class MessagesBusinessService : BaseBusinessService, IMessagesBusinessSer
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
-    private readonly ILogger _logger;
+    private readonly ILogger<MessagesBusinessService> _logger;
 
     public MessagesBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        ILogger logger) : base(httpContextAccessor)
+        ILogger<MessagesBusinessService> logger) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;

@@ -6,10 +6,10 @@ namespace WomenForum.Domain.Models;
 public class CommunityJoinRequest : BaseDbEntityWithId
 {
     public Guid UserId { get; set; }
-    public User User { get; set; } = null!;
+    public virtual User User { get; set; } = null!;
 
     public Guid CommunityId { get; set; }
-    public Community Community { get; set; } = null!;
+    public virtual Community Community { get; set; } = null!;
 
     public JoinRequestStatus Status { get; set; }
 
@@ -18,7 +18,7 @@ public class CommunityJoinRequest : BaseDbEntityWithId
     public DateTime? ReviewedAt { get; set; }
 
     public Guid ReviewedById { get; set; }
-    public User ReviewedBy { get; set; } = null!;
+    public virtual User ReviewedBy { get; set; } = null!;
 
     public string? Message { get; set; }
 }

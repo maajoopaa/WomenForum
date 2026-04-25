@@ -13,13 +13,13 @@ public class CommunityJoinRequestsBusinessService : BaseBusinessService, ICommun
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
-    private readonly ILogger _logger;
+    private readonly ILogger<CommunityJoinRequestsBusinessService> _logger;
 
     public CommunityJoinRequestsBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        ILogger logger) : base(httpContextAccessor)
+        ILogger<CommunityJoinRequestsBusinessService> logger) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;

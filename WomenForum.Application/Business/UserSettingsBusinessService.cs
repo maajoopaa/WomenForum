@@ -6,15 +6,15 @@ using WomenForum.Repository;
 
 namespace WomenForum.Business;
 
-public class UserSettingsBusinessService : BaseBusinessService, IUsersSettingsBusinessService
+public class UserSettingsBusinessService : BaseBusinessService, IUserSettingsBusinessService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger _logger;
+    private readonly ILogger<UserSettingsBusinessService> _logger;
 
     public UserSettingsBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
-        ILogger logger) : base(httpContextAccessor)
+        ILogger<UserSettingsBusinessService> logger) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;

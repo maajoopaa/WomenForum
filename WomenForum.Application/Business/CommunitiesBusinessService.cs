@@ -10,17 +10,17 @@ using WomenForum.Repository;
 
 namespace WomenForum.Business;
 
-public class CommunitiesBussinessService : BaseBusinessService, ICommunitiesBusinessService
+public class CommunitiesBusinessService : BaseBusinessService, ICommunitiesBusinessService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
-    private readonly ILogger _logger;
+    private readonly ILogger<CommunitiesBusinessService> _logger;
 
-    public CommunitiesBussinessService(
+    public CommunitiesBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
-        ILogger logger) : base(httpContextAccessor)
+        ILogger<CommunitiesBusinessService> logger) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;

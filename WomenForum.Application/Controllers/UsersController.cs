@@ -1,0 +1,133 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using WomenForum.Business.Interfaces;
+using WomenForum.Domain.Enums;
+using WomenForum.Models;
+using WomenForum.Models.Requests;
+
+namespace WomenForum.Controllers;
+
+[ApiController]
+[Route("users")]
+[Produces("application/json")]
+public class UsersController : ControllerBase
+{
+    private readonly IUsersBusinessService _usersBusinessService;
+    private readonly ICommunitiesBusinessService _communitiesBusinessService;
+    private readonly IPostsBusinessService _postsBusinessService;
+    private readonly IUserSettingsBusinessService _userSettingsBusinessService;
+
+    public UsersController(
+        IUsersBusinessService usersBusinessService,
+        ICommunitiesBusinessService communitiesBusinessService,
+        IPostsBusinessService postsBusinessService,
+        IUserSettingsBusinessService userSettingsBusinessService)
+    {
+        _usersBusinessService = usersBusinessService;
+        _communitiesBusinessService = communitiesBusinessService;
+        _postsBusinessService = postsBusinessService;
+        _userSettingsBusinessService = userSettingsBusinessService;
+    }
+    
+    [Authorize]
+    [HttpPut("{userId:guid}")]
+    public async Task<ActionResult> UpdateAsync(
+        Guid userId,
+        [FromBody] UpdateUserRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _usersBusinessService.UpdateUserAsync(userId, request, cancellationToken);
+
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpPatch("{userId:guid}/visibility")]
+    public async Task<ActionResult> UpdateVisibilityAsync(
+        Guid userId,
+        [FromQuery] VisibilityType visibility,
+        CancellationToken cancellationToken)
+    {
+        await _usersBusinessService.UpdateUserVisibilityAsync(userId, visibility, cancellationToken);
+
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpDelete]
+    public async Task<ActionResult> DeleteAsync(
+        [FromBody] List<Guid> userIds,
+        CancellationToken cancellationToken)
+    {
+        await _usersBusinessService.DeleteUsersAsync(userIds, cancellationToken);
+
+        return NoContent();
+    }
+    
+    [HttpGet("{userId:guid}/communities")]
+    public async Task<ActionResult<List<CommunityDto>>> GetCommunitiesAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var result = await _communitiesBusinessService.GetCommunitiesByUserIdAsync(userId, cancellationToken);
+
+        return Ok(result);
+    }
+    
+    [HttpGet("{userId:guid}/posts")]
+    public async Task<ActionResult<List<PostDto>>> GetPostsAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var result = await _postsBusinessService.GetPostsByUserIdAsync(userId, cancellationToken);
+
+        return Ok(result);
+    }
+    
+    [Authorize]
+    [HttpPut("{userId:guid}/settings")]
+    public async Task<ActionResult<List<CommunityDto>>> UpdateSettingsAsync(Guid userId,[FromQuery] UpdateUserSettingsRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _userSettingsBusinessService.UpdateUserSettingsAsync(userId,request, cancellationToken);
+
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpPut("{userId:guid}/subscriptions/{targetId:guid}")]
+    public async Task<ActionResult> ChangeSubscriptionStatusAsync(
+        Guid userId,
+        Guid targetId,
+        CancellationToken cancellationToken)
+    {
+        await _usersBusinessService.ChangeSubscriptionStatusAsync(userId, targetId, cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpGet("{userId:guid}/subscriptions")]
+    public async Task<ActionResult<List<SubscriptionDto>>> GetSubscriptionsAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        var result = await _usersBusinessService.GetSubscriptionsByUserIdAsync(userId, cancellationToken);
+
+        return Ok(result);
+    }
+
+    [HttpGet("{userId:guid}/subscribers")]
+    public async Task<ActionResult<List<SubscriptionDto>>> GetSubscribersAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        var result = await _usersBusinessService.GetSubscribersByUserIdAsync(userId, cancellationToken);
+
+        return Ok(result);
+    }
+
+    [Authorize]
+    [HttpGet]
+    public async Task<ActionResult<List<UserDto>>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        var result = await _usersBusinessService.GetAllUsersAsync(cancellationToken);
+
+        return Ok(result);
+    }
+}

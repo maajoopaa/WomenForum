@@ -29,23 +29,23 @@ public class User : BaseDbEntityWithId
     
     public VisibilityType Visibility { get; set; }
 
-    public UserSettings UserSettings { get; set; } = null!;
+    public virtual UserSettings UserSettings { get; set; } = null!;
     
-    public List<Like> Likes { get; set; } = [];
+    public virtual List<Like> Likes { get; set; } = [];
     
-    public List<Comment> Comments { get; set; } = [];
+    public virtual List<Comment> Comments { get; set; } = [];
     
-    public List<Message> Messages { get; set; } = [];
+    public virtual List<Message> Messages { get; set; } = [];
 
-    public List<Subscription> Following { get; set; } = [];
+    public virtual List<Subscription> Following { get; set; } = [];
     
-    public List<Subscription> Followers { get; set; } = [];
+    public virtual List<Subscription> Followers { get; set; } = [];
     
-    public List<Community> Communities { get; set; } = [];
+    public virtual List<Community> Communities { get; set; } = [];
     
-    public List<CommunityMember> CommunityMemberships { get; set; } = [];
+    public virtual List<CommunityMember> CommunityMemberships { get; set; } = [];
     
-    public List<Post> Posts { get; set; } = [];
+    public virtual List<Post> Posts { get; set; } = [];
     
-    public List<Report> Reports { get; set; } = [];
+    public virtual List<Report> Reports { get; set; } = [];
 }

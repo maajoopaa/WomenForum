@@ -15,12 +15,12 @@ public class Post : BaseDbEntityWithId
     public DateTime? DeletedAt { get; set; }
     
     public Guid AuthorUserId { get; set; }
-    public User AuthorUser { get; set; } = null!;
+    public virtual User AuthorUser { get; set; } = null!;
 
     public Guid? CommunityId { get; set; }
-    public Community? Community { get; set; }
+    public virtual Community? Community { get; set; }
 
-    public List<Like> Likes { get; set; } = [];
+    public virtual List<Like> Likes { get; set; } = [];
 
-    public List<Comment> Comments { get; set; } = [];
+    public virtual List<Comment> Comments { get; set; } = [];
 }

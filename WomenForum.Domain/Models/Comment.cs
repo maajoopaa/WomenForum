@@ -9,8 +9,8 @@ public class Comment : BaseDbEntityWithId
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public Guid CreatedById { get; set; }
-    public User CreatedBy { get; set; } = null!;
+    public virtual User CreatedBy { get; set; } = null!;
     
     public Guid PostId { get; set; }
-    public Post Post { get; set; } = null!;
+    public virtual Post Post { get; set; } = null!;
 }
