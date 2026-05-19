@@ -1,5 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Templates.Business;
+using Templates.Models;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Models;
 using WomenForum.Exceptions;
@@ -94,39 +95,72 @@ public class DiscussionThreadsBusinessService : BaseBusinessService, IDiscussion
         _logger.LogInformation("DiscussionThread deleted");
     }
 
-    public async Task<List<DiscussionThreadDto>> GetAllDiscussionThreadsAsync(CancellationToken cancellationToken)
+    public async Task<PagedResult<DiscussionThreadDto>> GetAllDiscussionThreadsAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
+    {
+        var pagedEntities = await _unitOfWork.DiscussionThreadsRepository.GetPagedAsync(null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
+        
+        return new PagedResult<DiscussionThreadDto>(
+            _mapper.Map<List<DiscussionThreadDto>>(pagedEntities.Items),
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize
+        );
+    }
+
+    public async Task<PagedResult<DiscussionThreadDto>> GetDiscussionThreadsBySearchQueryAsync(string? searchQuery,
+        PaginationParameters paginationParameters, CancellationToken cancellationToken)
+    {
+        var query = searchQuery?.ToLower();
+        var pagedEntities = await _unitOfWork.DiscussionThreadsRepository.GetPagedAsync(
+            x => string.IsNullOrEmpty(query) || x.Title.ToLower().Contains(query) || x.Description.ToLower().Contains(query),
+            paginationParameters.PageNumber,
+            paginationParameters.PageSize,
+            cancellationToken
+        );
+        
+        return new PagedResult<DiscussionThreadDto>(
+            _mapper.Map<List<DiscussionThreadDto>>(pagedEntities.Items),
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize
+        );
+    }
+
+    public async Task<PagedResult<DiscussionThreadDto>> GetPopularDiscussionThreadsAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
         var entities = await _unitOfWork.DiscussionThreadsRepository.GetAsync(null, cancellationToken);
         
-        return _mapper.Map<List<DiscussionThreadDto>>(entities);
+        var sorted = entities.OrderByDescending(x => x.Messages.Count).ToList();
+        var totalCount = sorted.Count;
+        var paged = sorted
+            .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+            .Take(paginationParameters.PageSize)
+            .ToList();
+        
+        return new PagedResult<DiscussionThreadDto>(
+            _mapper.Map<List<DiscussionThreadDto>>(paged),
+            totalCount,
+            paginationParameters.PageNumber,
+            paginationParameters.PageSize
+        );
     }
 
-    public async Task<List<DiscussionThreadDto>> GetDiscussionThreadsBySearchQueryAsync(string searchQuery,
-        CancellationToken cancellationToken)
-    {
-        searchQuery = searchQuery.ToLower();
-        
-        var entities = await _unitOfWork.DiscussionThreadsRepository.GetAsync(x => 
-            x.Title.Contains(searchQuery) || x.Description.Contains(searchQuery),cancellationToken);
-        
-        return _mapper.Map<List<DiscussionThreadDto>>(entities);
-    }
-
-    public async Task<List<DiscussionThreadDto>> GetPopularDiscussionThreadsAsync(CancellationToken cancellationToken)
-    {
-        var entities = await _unitOfWork.DiscussionThreadsRepository.GetAsync(null, cancellationToken);
-        
-        entities = entities.OrderByDescending(x => x.Messages.Count).ToList();
-        
-        return _mapper.Map<List<DiscussionThreadDto>>(entities);
-    }
-
-    public async Task<List<DiscussionThreadDto>> GetRecentDiscussionThreadsAsync(CancellationToken cancellationToken)
+    public async Task<PagedResult<DiscussionThreadDto>> GetRecentDiscussionThreadsAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
         var entities = await _unitOfWork.DiscussionThreadsRepository.GetAsync(null, cancellationToken);
         
-        entities = entities.OrderByDescending(x => x.CreatedAt).ToList();
+        var sorted = entities.OrderByDescending(x => x.CreatedAt).ToList();
+        var totalCount = sorted.Count;
+        var paged = sorted
+            .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+            .Take(paginationParameters.PageSize)
+            .ToList();
         
-        return _mapper.Map<List<DiscussionThreadDto>>(entities);
+        return new PagedResult<DiscussionThreadDto>(
+            _mapper.Map<List<DiscussionThreadDto>>(paged),
+            totalCount,
+            paginationParameters.PageNumber,
+            paginationParameters.PageSize
+        );
     }
 }

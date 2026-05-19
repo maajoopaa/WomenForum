@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Templates.Models;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Enums;
 using WomenForum.Models;
@@ -26,14 +27,14 @@ public class ReportsController : ControllerBase
     {
         var result = await _reportsBusinessService.AddReportAsync(request, cancellationToken);
 
-        return Ok(result);
+        return Created(string.Empty, result);
     }
 
     [Authorize]
     [HttpGet]
-    public async Task<ActionResult<List<ReportDto>>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResult<ReportDto>>> GetAllAsync([FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var result = await _reportsBusinessService.GetAllReportsAsync(cancellationToken);
+        var result = await _reportsBusinessService.GetAllReportsAsync(paginationParameters, cancellationToken);
 
         return Ok(result);
     }

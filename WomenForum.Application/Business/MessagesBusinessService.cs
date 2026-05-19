@@ -1,5 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Templates.Business;
+using Templates.Models;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Models;
 using WomenForum.Exceptions;
@@ -96,19 +97,29 @@ public class MessagesBusinessService : BaseBusinessService, IMessagesBusinessSer
         _logger.LogInformation("Messages successfully deleted");
     }
 
-    public async Task<List<MessageDto>> GetMessagesByDiscussionThreadIdAsync(Guid discussionThreadId, CancellationToken cancellationToken)
+    public async Task<PagedResult<MessageDto>> GetMessagesByDiscussionThreadIdAsync(Guid discussionThreadId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var entities = await _unitOfWork.MessagesRepository.GetAsync(x =>
-            x.DiscussionThreadId == discussionThreadId && x.ParentMessageId == null, cancellationToken);
+        var pagedEntities = await _unitOfWork.MessagesRepository.GetPagedAsync(x =>
+            x.DiscussionThreadId == discussionThreadId && x.ParentMessageId == null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
         
-        return _mapper.Map<List<MessageDto>>(entities);
+        return new PagedResult<MessageDto>(
+            _mapper.Map<List<MessageDto>>(pagedEntities.Items),
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize
+        );
     }
 
-    public async Task<List<MessageDto>> GetRepliesAsync(Guid messageId, CancellationToken cancellationToken)
+    public async Task<PagedResult<MessageDto>> GetRepliesAsync(Guid messageId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var replies = await _unitOfWork.MessagesRepository.GetAsync(x =>
-            x.ParentMessageId == messageId, cancellationToken);
+        var pagedReplies = await _unitOfWork.MessagesRepository.GetPagedAsync(x =>
+            x.ParentMessageId == messageId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
         
-        return _mapper.Map<List<MessageDto>>(replies);
+        return new PagedResult<MessageDto>(
+            _mapper.Map<List<MessageDto>>(pagedReplies.Items),
+            pagedReplies.TotalCount,
+            pagedReplies.PageNumber,
+            pagedReplies.PageSize
+        );
     }
 }

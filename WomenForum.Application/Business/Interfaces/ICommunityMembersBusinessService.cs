@@ -1,4 +1,5 @@
-﻿using Templates.Business.Interfaces;
+using Templates.Business.Interfaces;
+using Templates.Models;
 using WomenForum.Domain.Enums;
 using WomenForum.Models;
 
@@ -9,5 +10,5 @@ public interface ICommunityMembersBusinessService : IBaseBusinessService
     public Task ChangeBanStatusCommunityMemberAsync(Guid memberId, bool isBanned, CancellationToken cancellationToken);
     public Task DeleteCommunityMembersAsync(List<Guid> memberIds, CancellationToken cancellationToken);
     public Task ChangeCommunityMemberRoleAsync(Guid memberId, CommunityRole role, CancellationToken cancellationToken);
-    public Task<List<CommunityMemberDto>> GetCommunityMembersByCommunityIdAsync(Guid communityId, CancellationToken cancellationToken);
+    public Task<PagedResult<CommunityMemberDto>> GetCommunityMembersByCommunityIdAsync(Guid communityId, PaginationParameters paginationParameters, CancellationToken cancellationToken);
 }

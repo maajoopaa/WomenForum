@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Templates.Models;
 using WomenForum.Business.Interfaces;
 using WomenForum.Models;
 using WomenForum.Models.Requests;
@@ -19,9 +20,9 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<CategoryDto>>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResult<CategoryDto>>> GetAllAsync([FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var result = await _categoriesBusinessService.GetAllCategoriesAsync(cancellationToken);
+        var result = await _categoriesBusinessService.GetAllCategoriesAsync(paginationParameters, cancellationToken);
 
         return Ok(result);
     }
@@ -33,7 +34,7 @@ public class CategoriesController : ControllerBase
     {
         var result = await _categoriesBusinessService.AddCategoryAsync(request, cancellationToken);
 
-        return Ok(result);
+        return Created(string.Empty, result);
     }
     
     [Authorize]

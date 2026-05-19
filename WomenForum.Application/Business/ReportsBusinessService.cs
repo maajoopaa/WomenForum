@@ -1,5 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Templates.Business;
+using Templates.Models;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Enums;
 using WomenForum.Domain.Models;
@@ -116,7 +117,7 @@ public class ReportsBusinessService : BaseBusinessService, IReportsBusinessServi
         _logger.LogInformation("Report changed");
     }
 
-    public async Task<List<ReportDto>> GetAllReportsAsync(CancellationToken cancellationToken)
+    public async Task<PagedResult<ReportDto>> GetAllReportsAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
         var permissions =
             await _permissionsService.GetUserPermissionsAsync("reports", UserId, Guid.Empty, cancellationToken);
@@ -126,8 +127,13 @@ public class ReportsBusinessService : BaseBusinessService, IReportsBusinessServi
             throw new NoPermissionException("У вас недостаточно прав для этого действия.");
         }
         
-        var entities = await _unitOfWork.ReportsRepository.GetAsync(null, cancellationToken);
+        var pagedEntities = await _unitOfWork.ReportsRepository.GetPagedAsync(null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
 
-        return _mapper.Map<List<ReportDto>>(entities);
+        return new PagedResult<ReportDto>(
+            _mapper.Map<List<ReportDto>>(pagedEntities.Items),
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize
+        );
     }
 }

@@ -1,5 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Templates.Business;
+using Templates.Models;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Enums;
 using WomenForum.Domain.Models;
@@ -65,7 +66,7 @@ public class CommunityJoinRequestsBusinessService : BaseBusinessService, ICommun
         _logger.LogInformation("Community join request successfully sent.");
     }
 
-    public async Task<List<CommunityJoinRequestDto>> GetJoinRequestsByCommunityIdAsync(Guid communityId, CancellationToken cancellationToken)
+    public async Task<PagedResult<CommunityJoinRequestDto>> GetJoinRequestsByCommunityIdAsync(Guid communityId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
         var permissions =
             await _permissionsService.GetUserPermissionsAsync("communities", UserId, communityId, cancellationToken);
@@ -75,10 +76,15 @@ public class CommunityJoinRequestsBusinessService : BaseBusinessService, ICommun
             throw new NoPermissionException("У вас недостаточно прав для этого действия.");
         }
         
-        var entities = await _unitOfWork.CommunityJoinRequestsRepository.GetAsync(x =>
-            x.CommunityId == communityId, cancellationToken);
+        var pagedEntities = await _unitOfWork.CommunityJoinRequestsRepository.GetPagedAsync(x =>
+            x.CommunityId == communityId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
         
-        return _mapper.Map<List<CommunityJoinRequestDto>>(entities);
+        return new PagedResult<CommunityJoinRequestDto>(
+            _mapper.Map<List<CommunityJoinRequestDto>>(pagedEntities.Items),
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize
+        );
     }
 
     public async Task ChangeJoinRequestStatusAsync(Guid requestId, JoinRequestStatus status, string? message,

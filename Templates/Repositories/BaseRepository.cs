@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Templates.Models;
 using Templates.Repositories.Interfaces;
@@ -51,6 +51,24 @@ public class BaseRepository<TEntity, TContext> : IBaseRepository<TEntity>
     public virtual async Task<List<TEntity>> GetAsync(Expression<Func<TEntity, bool>>? predicate, CancellationToken cancellationToken)
     {
         return await DbSet.Where(predicate ?? (entity => true)).ToListAsync(cancellationToken);
+    }
+
+    public virtual async Task<PagedResult<TEntity>> GetPagedAsync(
+        Expression<Func<TEntity, bool>>? predicate,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken)
+    {
+        var query = DbSet.Where(predicate ?? (entity => true));
+        var totalCount = await query.CountAsync(cancellationToken);
+        
+        var items = await query
+            .OrderBy(e => e.Id)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return new PagedResult<TEntity>(items, totalCount, pageNumber, pageSize);
     }
 
     public virtual async Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken)

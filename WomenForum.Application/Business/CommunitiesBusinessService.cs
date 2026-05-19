@@ -1,5 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Templates.Business;
+using Templates.Models;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Enums;
 using WomenForum.Domain.Models;
@@ -119,37 +120,65 @@ public class CommunitiesBusinessService : BaseBusinessService, ICommunitiesBusin
         _logger.LogInformation("Community successfully deleted");
     }
 
-    public async Task<List<CommunityDto>> GetAllCommunitiesAsync(CancellationToken cancellationToken)
+    public async Task<PagedResult<CommunityDto>> GetAllCommunitiesAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
+    {
+        var pagedEntities = await _unitOfWork.CommunitiesRepository.GetPagedAsync(null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
+        
+        return new PagedResult<CommunityDto>(
+            _mapper.Map<List<CommunityDto>>(pagedEntities.Items),
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize
+        );
+    }
+
+    public async Task<PagedResult<CommunityDto>> GetCommunitiesByUserIdAsync(Guid userId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
+    {
+        var pagedEntities = await _unitOfWork.CommunitiesRepository.GetPagedAsync(x => x.CreatedById == userId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
+        
+        return new PagedResult<CommunityDto>(
+            _mapper.Map<List<CommunityDto>>(pagedEntities.Items),
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize
+        );
+    }
+
+    public async Task<PagedResult<CommunityDto>> GetCommunitiesBySearchQueryAsync(string? searchQuery, PaginationParameters paginationParameters, CancellationToken cancellationToken)
+    {
+        var query = searchQuery?.ToLower();
+        var pagedEntities = await _unitOfWork.CommunitiesRepository.GetPagedAsync(
+            x => string.IsNullOrEmpty(query) || x.Title.ToLower().Contains(query) || x.Description.ToLower().Contains(query),
+            paginationParameters.PageNumber,
+            paginationParameters.PageSize,
+            cancellationToken
+        );
+        
+        return new PagedResult<CommunityDto>(
+            _mapper.Map<List<CommunityDto>>(pagedEntities.Items),
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize
+        );
+    }
+
+    public async Task<PagedResult<CommunityDto>> GetPopularCommunitiesAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
         var entities = await _unitOfWork.CommunitiesRepository.GetAsync(null, cancellationToken);
         
-        return _mapper.Map<List<CommunityDto>>(entities);
-    }
+        var sorted = entities.OrderByDescending(x => x.Members.Count + x.Posts.Count).ToList();
+        var totalCount = sorted.Count;
+        var paged = sorted
+            .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+            .Take(paginationParameters.PageSize)
+            .ToList();
 
-    public async Task<List<CommunityDto>> GetCommunitiesByUserIdAsync(Guid userId, CancellationToken cancellationToken)
-    {
-        var entities = await _unitOfWork.CommunitiesRepository.GetAsync(x => x.CreatedById == userId,cancellationToken);
-        
-        return _mapper.Map<List<CommunityDto>>(entities);
-    }
-
-    public async Task<List<CommunityDto>> GetCommunitiesBySearchQueryAsync(string searchQuery, CancellationToken cancellationToken)
-    {
-        searchQuery = searchQuery.ToLower();
-        
-        var entities = await _unitOfWork.CommunitiesRepository.GetAsync(x => 
-                x.Title.Contains(searchQuery) || x.Description.Contains(searchQuery), cancellationToken);
-        
-        return _mapper.Map<List<CommunityDto>>(entities);
-    }
-
-    public async Task<List<CommunityDto>> GetPopularCommunitiesAsync(CancellationToken cancellationToken)
-    {
-        var entities = await _unitOfWork.CommunitiesRepository.GetAsync(null,cancellationToken);
-        
-        entities = entities.OrderByDescending(x => x.Members.Count + x.Posts.Count).ToList();
-
-        return _mapper.Map<List<CommunityDto>>(entities);
+        return new PagedResult<CommunityDto>(
+            _mapper.Map<List<CommunityDto>>(paged),
+            totalCount,
+            paginationParameters.PageNumber,
+            paginationParameters.PageSize
+        );
     }
 
     public async Task ChangeCommunityVisibilityAsync(Guid communityId, VisibilityType visibility, CancellationToken cancellationToken)

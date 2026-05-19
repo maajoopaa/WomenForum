@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Templates.Models;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Enums;
 using WomenForum.Models;
@@ -56,7 +57,7 @@ public class UsersController : ControllerBase
     [Authorize]
     [HttpDelete]
     public async Task<ActionResult> DeleteAsync(
-        [FromBody] List<Guid> userIds,
+        [FromQuery] List<Guid> userIds,
         CancellationToken cancellationToken)
     {
         await _usersBusinessService.DeleteUsersAsync(userIds, cancellationToken);
@@ -65,24 +66,24 @@ public class UsersController : ControllerBase
     }
     
     [HttpGet("{userId:guid}/communities")]
-    public async Task<ActionResult<List<CommunityDto>>> GetCommunitiesAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResult<CommunityDto>>> GetCommunitiesAsync(Guid userId, [FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var result = await _communitiesBusinessService.GetCommunitiesByUserIdAsync(userId, cancellationToken);
+        var result = await _communitiesBusinessService.GetCommunitiesByUserIdAsync(userId, paginationParameters, cancellationToken);
 
         return Ok(result);
     }
     
     [HttpGet("{userId:guid}/posts")]
-    public async Task<ActionResult<List<PostDto>>> GetPostsAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResult<PostDto>>> GetPostsAsync(Guid userId, [FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var result = await _postsBusinessService.GetPostsByUserIdAsync(userId, cancellationToken);
+        var result = await _postsBusinessService.GetPostsByUserIdAsync(userId, paginationParameters, cancellationToken);
 
         return Ok(result);
     }
     
     [Authorize]
     [HttpPut("{userId:guid}/settings")]
-    public async Task<ActionResult<List<CommunityDto>>> UpdateSettingsAsync(Guid userId,[FromQuery] UpdateUserSettingsRequest request,
+    public async Task<ActionResult> UpdateSettingsAsync(Guid userId, [FromBody] UpdateUserSettingsRequest request,
         CancellationToken cancellationToken)
     {
         await _userSettingsBusinessService.UpdateUserSettingsAsync(userId,request, cancellationToken);
@@ -103,30 +104,32 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("{userId:guid}/subscriptions")]
-    public async Task<ActionResult<List<SubscriptionDto>>> GetSubscriptionsAsync(
+    public async Task<ActionResult<PagedResult<SubscriptionDto>>> GetSubscriptionsAsync(
         Guid userId,
+        [FromQuery] PaginationParameters paginationParameters,
         CancellationToken cancellationToken)
     {
-        var result = await _usersBusinessService.GetSubscriptionsByUserIdAsync(userId, cancellationToken);
+        var result = await _usersBusinessService.GetSubscriptionsByUserIdAsync(userId, paginationParameters, cancellationToken);
 
         return Ok(result);
     }
 
     [HttpGet("{userId:guid}/subscribers")]
-    public async Task<ActionResult<List<SubscriptionDto>>> GetSubscribersAsync(
+    public async Task<ActionResult<PagedResult<SubscriptionDto>>> GetSubscribersAsync(
         Guid userId,
+        [FromQuery] PaginationParameters paginationParameters,
         CancellationToken cancellationToken)
     {
-        var result = await _usersBusinessService.GetSubscribersByUserIdAsync(userId, cancellationToken);
+        var result = await _usersBusinessService.GetSubscribersByUserIdAsync(userId, paginationParameters, cancellationToken);
 
         return Ok(result);
     }
 
     [Authorize]
     [HttpGet]
-    public async Task<ActionResult<List<UserDto>>> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResult<UserDto>>> GetAllAsync([FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var result = await _usersBusinessService.GetAllUsersAsync(cancellationToken);
+        var result = await _usersBusinessService.GetAllUsersAsync(paginationParameters, cancellationToken);
 
         return Ok(result);
     }

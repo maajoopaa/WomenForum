@@ -1,5 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Templates.Business;
+using Templates.Models;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Enums;
 using WomenForum.Domain.Models;
@@ -131,7 +132,7 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
         _logger.LogInformation("Subscription successfully deleted {@Subscription}.", existingSubscription);
     }
 
-    public async Task<List<SubscriptionDto>> GetSubscriptionsByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<PagedResult<SubscriptionDto>> GetSubscriptionsByUserIdAsync(Guid userId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
         var permissions =
             await _permissionsService.GetUserPermissionsAsync("users", UserId, userId, cancellationToken);
@@ -141,13 +142,18 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
             throw new NoPermissionException("У вас недостаточно прав для этого действия.");
         }
         
-        var entities = await _unitOfWork.SubscriptionsRepository.GetAsync(x =>
-            x.SubscriberId == userId, cancellationToken);
+        var pagedEntities = await _unitOfWork.SubscriptionsRepository.GetPagedAsync(x =>
+            x.SubscriberId == userId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
 
-        return _mapper.Map<List<SubscriptionDto>>(entities);
+        return new PagedResult<SubscriptionDto>(
+            _mapper.Map<List<SubscriptionDto>>(pagedEntities.Items),
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize
+        );
     }
 
-    public async Task<List<SubscriptionDto>> GetSubscribersByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<PagedResult<SubscriptionDto>> GetSubscribersByUserIdAsync(Guid userId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
         var permissions =
             await _permissionsService.GetUserPermissionsAsync("users", UserId, userId, cancellationToken);
@@ -157,16 +163,26 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
             throw new NoPermissionException("У вас недостаточно прав для этого действия.");
         }
         
-        var entities = await _unitOfWork.SubscriptionsRepository.GetAsync(x =>
-            x.TargetUserId == userId, cancellationToken);
+        var pagedEntities = await _unitOfWork.SubscriptionsRepository.GetPagedAsync(x =>
+            x.TargetUserId == userId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
 
-        return _mapper.Map<List<SubscriptionDto>>(entities);
+        return new PagedResult<SubscriptionDto>(
+            _mapper.Map<List<SubscriptionDto>>(pagedEntities.Items),
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize
+        );
     }
 
-    public async Task<List<UserDto>> GetAllUsersAsync(CancellationToken cancellationToken)
+    public async Task<PagedResult<UserDto>> GetAllUsersAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var entities = await _unitOfWork.UsersRepository.GetAsync(null, cancellationToken);
+        var pagedEntities = await _unitOfWork.UsersRepository.GetPagedAsync(null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
 
-        return _mapper.Map<List<UserDto>>(entities);
+        return new PagedResult<UserDto>(
+            _mapper.Map<List<UserDto>>(pagedEntities.Items),
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize
+        );
     }
 }

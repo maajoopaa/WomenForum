@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Templates.Models;
 using WomenForum.Business.Interfaces;
 using WomenForum.Models;
 using WomenForum.Models.Requests;
@@ -31,7 +32,7 @@ public class PostsController : ControllerBase
     {
         var result = await _postsBusinessService.AddPostAsync(request, cancellationToken);
 
-        return Ok(result);
+        return Created(string.Empty, result);
     }
 
     [Authorize]
@@ -54,9 +55,14 @@ public class PostsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<PostDto>>> GetPostsAsync([FromQuery] string searchQuery, CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResult<PostDto>>> GetPostsAsync([FromQuery] string? searchQuery, [FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var result = await _postsBusinessService.GetPostsBySearchQueryAsync(searchQuery, cancellationToken);
+        if (string.IsNullOrEmpty(searchQuery))
+        {
+            var allResult = await _postsBusinessService.GetRecentPostsAsync(paginationParameters, cancellationToken);
+            return Ok(allResult);
+        }
+        var result = await _postsBusinessService.GetPostsBySearchQueryAsync(searchQuery, paginationParameters, cancellationToken);
 
         return Ok(result);
     }
@@ -68,7 +74,7 @@ public class PostsController : ControllerBase
     {
         var result = await _commentsBusinessService.AddCommentAsync(postId,request, cancellationToken);
 
-        return Ok(result);
+        return Created(string.Empty, result);
     }
     
     [Authorize]

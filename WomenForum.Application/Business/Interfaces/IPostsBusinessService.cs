@@ -1,4 +1,5 @@
-﻿using Templates.Business.Interfaces;
+using Templates.Business.Interfaces;
+using Templates.Models;
 using WomenForum.Models;
 using WomenForum.Models.Requests;
 
@@ -9,9 +10,9 @@ public interface IPostsBusinessService : IBaseBusinessService
     public Task<PostDto> AddPostAsync(CreatePostRequest request, CancellationToken cancellationToken);
     public Task UpdatePostAsync(Guid postId, UpdatePostRequest request, CancellationToken cancellationToken);
     public Task DeletePostAsync(Guid postId, CancellationToken cancellationToken);
-    public Task<List<PostDto>> GetPostsByCommunityIdAsync(Guid communityId, CancellationToken cancellationToken);
-    public Task<List<PostDto>> GetPostsByUserIdAsync(Guid userId, CancellationToken cancellationToken);
-    public Task<List<PostDto>> GetPopularPostsAsync(CancellationToken cancellationToken);
-    public Task<List<PostDto>> GetRecentPostsAsync(CancellationToken cancellationToken);
-    public Task<List<PostDto>> GetPostsBySearchQueryAsync(string query, CancellationToken cancellationToken);
+    public Task<PagedResult<PostDto>> GetPostsByCommunityIdAsync(Guid communityId, PaginationParameters paginationParameters, CancellationToken cancellationToken);
+    public Task<PagedResult<PostDto>> GetPostsByUserIdAsync(Guid userId, PaginationParameters paginationParameters, CancellationToken cancellationToken);
+    public Task<PagedResult<PostDto>> GetPopularPostsAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken);
+    public Task<PagedResult<PostDto>> GetRecentPostsAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken);
+    public Task<PagedResult<PostDto>> GetPostsBySearchQueryAsync(string? query, PaginationParameters paginationParameters, CancellationToken cancellationToken);
 }

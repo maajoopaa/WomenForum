@@ -1,5 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Templates.Business;
+using Templates.Models;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Models;
 using WomenForum.Exceptions;
@@ -49,11 +50,16 @@ public class CategoriesBusinessService : BaseBusinessService,ICategoriesBusiness
         return _mapper.Map<CategoryDto>(entity);
     }
 
-    public async Task<List<CategoryDto>> GetAllCategoriesAsync(CancellationToken cancellationToken)
+    public async Task<PagedResult<CategoryDto>> GetAllCategoriesAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var entities = await _unitOfWork.CategoriesRepository.GetAsync(null, cancellationToken);
+        var pagedEntities = await _unitOfWork.CategoriesRepository.GetPagedAsync(null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
         
-        return _mapper.Map<List<CategoryDto>>(entities);
+        return new PagedResult<CategoryDto>(
+            _mapper.Map<List<CategoryDto>>(pagedEntities.Items),
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize
+        );
     }
 
     public async Task UpdateCategoryAsync(Guid categoryId, UpdateCategoryRequest request, CancellationToken cancellationToken)

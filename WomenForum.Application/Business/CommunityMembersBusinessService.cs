@@ -1,5 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Templates.Business;
+using Templates.Models;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Enums;
 using WomenForum.Exceptions;
@@ -98,7 +99,7 @@ public class CommunityMembersBusinessService : BaseBusinessService, ICommunityMe
         _logger.LogInformation("Community member successfully changed.");
     }
 
-    public async Task<List<CommunityMemberDto>> GetCommunityMembersByCommunityIdAsync(Guid communityId, CancellationToken cancellationToken)
+    public async Task<PagedResult<CommunityMemberDto>> GetCommunityMembersByCommunityIdAsync(Guid communityId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
         var permissions =
             await _permissionsService.GetUserPermissionsAsync("communities", UserId, communityId, cancellationToken);
@@ -108,10 +109,15 @@ public class CommunityMembersBusinessService : BaseBusinessService, ICommunityMe
             throw new NoPermissionException("У вас недостаточно прав для этого действия.");
         }
         
-        var entities =
-            await _unitOfWork.CommunityMembersRepository.GetAsync(x =>
-                x.CommunityId == communityId, cancellationToken);
+        var pagedEntities =
+            await _unitOfWork.CommunityMembersRepository.GetPagedAsync(x =>
+                x.CommunityId == communityId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
         
-        return _mapper.Map<List<CommunityMemberDto>>(entities);
+        return new PagedResult<CommunityMemberDto>(
+            _mapper.Map<List<CommunityMemberDto>>(pagedEntities.Items),
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize
+        );
     }
 }

@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Templates.Models;
 using WomenForum.Business.Interfaces;
 using WomenForum.Models;
 using WomenForum.Models.Requests;
@@ -23,11 +24,19 @@ public class DiscussionThreadsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<DiscussionThreadDto>>> GetAllAsync([FromQuery] string searchQuery,
+    public async Task<ActionResult<PagedResult<DiscussionThreadDto>>> GetAllAsync(
+        [FromQuery] string? searchQuery,
+        [FromQuery] PaginationParameters paginationParameters,
         CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(searchQuery))
+        {
+            var allResult = await _discussionThreadsBusinessService.GetAllDiscussionThreadsAsync(paginationParameters, cancellationToken);
+            return Ok(allResult);
+        }
         var result =
             await _discussionThreadsBusinessService.GetDiscussionThreadsBySearchQueryAsync(searchQuery,
+                paginationParameters,
                 cancellationToken);
 
         return Ok(result);
@@ -40,7 +49,7 @@ public class DiscussionThreadsController : ControllerBase
     {
         var result = await _discussionThreadsBusinessService.AddDiscussionThreadAsync(request, cancellationToken);
 
-        return Ok(result);
+        return Created(string.Empty, result);
     }
 
     [Authorize]
@@ -69,7 +78,7 @@ public class DiscussionThreadsController : ControllerBase
     {
         var result = await _messagesBusinessService.AddMessageAsync(threadId, request, cancellationToken);
 
-        return Ok(result);
+        return Created(string.Empty, result);
     }
     
     [Authorize]
@@ -84,7 +93,7 @@ public class DiscussionThreadsController : ControllerBase
     
     [Authorize]
     [HttpDelete("{threadId:guid}/messages")]
-    public async Task<ActionResult> DeleteMessagesAsync(List<Guid> messageIds, CancellationToken cancellationToken)
+    public async Task<ActionResult> DeleteMessagesAsync([FromQuery] List<Guid> messageIds, CancellationToken cancellationToken)
     {
         await _messagesBusinessService.DeleteMessagesAsync(messageIds,cancellationToken);
 
@@ -92,18 +101,18 @@ public class DiscussionThreadsController : ControllerBase
     }
     
     [HttpGet("{threadId:guid}/messages")]
-    public async Task<ActionResult<List<MessageDto>>> GetMessagesAsync(Guid threadId, CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResult<MessageDto>>> GetMessagesAsync(Guid threadId, [FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var result = await _messagesBusinessService.GetMessagesByDiscussionThreadIdAsync(threadId, cancellationToken);
+        var result = await _messagesBusinessService.GetMessagesByDiscussionThreadIdAsync(threadId, paginationParameters, cancellationToken);
 
         return Ok(result);
     }
     
     [Authorize]
     [HttpGet("{threadId:guid}/messages/{messageId:guid}/replies")]
-    public async Task<ActionResult<List<MessageDto>>> GetMessageRepliesAsync(Guid messageId, CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResult<MessageDto>>> GetMessageRepliesAsync(Guid messageId, [FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var result = await _messagesBusinessService.GetRepliesAsync(messageId, cancellationToken);
+        var result = await _messagesBusinessService.GetRepliesAsync(messageId, paginationParameters, cancellationToken);
 
         return Ok(result);
     }

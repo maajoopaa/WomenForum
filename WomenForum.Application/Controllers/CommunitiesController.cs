@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Templates.Models;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Enums;
 using WomenForum.Models;
@@ -30,9 +31,14 @@ public class CommunitiesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<CommunityDto>>> GetAllAsync([FromQuery] string searchQuery,CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResult<CommunityDto>>> GetAllAsync([FromQuery] string? searchQuery, [FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var result = await _communitiesBusinessService.GetCommunitiesBySearchQueryAsync(searchQuery,cancellationToken);
+        if (string.IsNullOrEmpty(searchQuery))
+        {
+            var allResult = await _communitiesBusinessService.GetAllCommunitiesAsync(paginationParameters, cancellationToken);
+            return Ok(allResult);
+        }
+        var result = await _communitiesBusinessService.GetCommunitiesBySearchQueryAsync(searchQuery, paginationParameters, cancellationToken);
         
         return Ok(result);
     }
@@ -44,7 +50,7 @@ public class CommunitiesController : ControllerBase
     {
         var result = await _communitiesBusinessService.AddCommunityAsync(request, cancellationToken);
 
-        return Ok(result);
+        return Created(string.Empty, result);
     }
 
     [Authorize]
@@ -58,9 +64,9 @@ public class CommunitiesController : ControllerBase
     }
     
     [HttpGet("{communityId:guid}/posts")]
-    public async Task<ActionResult<List<PostDto>>> GetPostsAsync(Guid communityId, CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResult<PostDto>>> GetPostsAsync(Guid communityId, [FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var result = await _postsBusinessService.GetPostsByCommunityIdAsync(communityId, cancellationToken);
+        var result = await _postsBusinessService.GetPostsByCommunityIdAsync(communityId, paginationParameters, cancellationToken);
         
         return Ok(result);
     }
@@ -94,9 +100,9 @@ public class CommunitiesController : ControllerBase
     }
     
     [HttpGet("{communityId:guid}/members")]
-    public async Task<ActionResult> GetMembersAsync(Guid communityId, CancellationToken cancellationToken)
+    public async Task<ActionResult<PagedResult<CommunityMemberDto>>> GetMembersAsync(Guid communityId, [FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var result = await _communityMembersBusinessService.GetCommunityMembersByCommunityIdAsync(communityId, cancellationToken);
+        var result = await _communityMembersBusinessService.GetCommunityMembersByCommunityIdAsync(communityId, paginationParameters, cancellationToken);
 
         return Ok(result);
     }
@@ -112,7 +118,7 @@ public class CommunitiesController : ControllerBase
 
     [Authorize]
     [HttpDelete("{communityId:guid}/members")]
-    public async Task<ActionResult> ChangeMemberRoleAsync(List<Guid> memberIds, CancellationToken cancellationToken)
+    public async Task<ActionResult> DeleteMembersAsync([FromQuery] List<Guid> memberIds, CancellationToken cancellationToken)
     {
         await _communityMembersBusinessService.DeleteCommunityMembersAsync(memberIds, cancellationToken);
 
@@ -130,11 +136,13 @@ public class CommunitiesController : ControllerBase
 
     [Authorize]
     [HttpGet("{communityId:guid}/join-requests")]
-    public async Task<ActionResult<List<CommunityJoinRequestDto>>> GetJoinRequests(Guid communityId,
+    public async Task<ActionResult<PagedResult<CommunityJoinRequestDto>>> GetJoinRequests(Guid communityId,
+        [FromQuery] PaginationParameters paginationParameters,
         CancellationToken cancellationToken)
     {
         var result =
             await _communityJoinRequestsBusinessService.GetJoinRequestsByCommunityIdAsync(communityId,
+                paginationParameters,
                 cancellationToken);
 
         return Ok(result);

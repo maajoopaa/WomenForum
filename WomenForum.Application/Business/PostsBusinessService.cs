@@ -1,5 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Templates.Business;
+using Templates.Models;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Models;
 using WomenForum.Exceptions;
@@ -109,7 +110,7 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
         _logger.LogInformation("Post deleted");
     }
 
-    public async Task<List<PostDto>> GetPostsByCommunityIdAsync(Guid communityId, CancellationToken cancellationToken)
+    public async Task<PagedResult<PostDto>> GetPostsByCommunityIdAsync(Guid communityId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
         var permissions =
             await _permissionsService.GetUserPermissionsAsync("communities", UserId, communityId, cancellationToken);
@@ -119,13 +120,18 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
             throw new NoPermissionException("У вас недостаточно прав для этого действия.");
         }
         
-        var entities = await _unitOfWork.PostsRepository.GetAsync(x =>
-            x.CommunityId == communityId, cancellationToken);
+        var pagedEntities = await _unitOfWork.PostsRepository.GetPagedAsync(x =>
+            x.CommunityId == communityId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
 
-        return _mapper.Map<List<PostDto>>(entities);
+        return new PagedResult<PostDto>(
+            _mapper.Map<List<PostDto>>(pagedEntities.Items),
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize
+        );
     }
 
-    public async Task<List<PostDto>> GetPostsByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<PagedResult<PostDto>> GetPostsByUserIdAsync(Guid userId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
         var permissions =
             await _permissionsService.GetUserPermissionsAsync("users", UserId, userId, cancellationToken);
@@ -135,37 +141,66 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
             throw new NoPermissionException("У вас недостаточно прав для этого действия.");
         }
         
-        var entities = await _unitOfWork.PostsRepository.GetAsync(x =>
-            x.AuthorUserId == userId, cancellationToken);
+        var pagedEntities = await _unitOfWork.PostsRepository.GetPagedAsync(x =>
+            x.AuthorUserId == userId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
 
-        return _mapper.Map<List<PostDto>>(entities);
+        return new PagedResult<PostDto>(
+            _mapper.Map<List<PostDto>>(pagedEntities.Items),
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize
+        );
     }
 
-    public async Task<List<PostDto>> GetPopularPostsAsync(CancellationToken cancellationToken)
+    public async Task<PagedResult<PostDto>> GetPopularPostsAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
         var entities = await _unitOfWork.PostsRepository.GetAsync(null, cancellationToken);
         
-        entities = entities.OrderByDescending(x => x.Likes.Count + x.Comments.Count).ToList();
+        var sorted = entities.OrderByDescending(x => x.Likes.Count + x.Comments.Count).ToList();
+        var totalCount = sorted.Count;
+        var paged = sorted
+            .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+            .Take(paginationParameters.PageSize)
+            .ToList();
 
-        return _mapper.Map<List<PostDto>>(entities);
+        return new PagedResult<PostDto>(
+            _mapper.Map<List<PostDto>>(paged),
+            totalCount,
+            paginationParameters.PageNumber,
+            paginationParameters.PageSize
+        );
     }
 
-    public async Task<List<PostDto>> GetRecentPostsAsync(CancellationToken cancellationToken)
+    public async Task<PagedResult<PostDto>> GetRecentPostsAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
         var entities = await _unitOfWork.PostsRepository.GetAsync(null, cancellationToken);
         
-        entities = entities.OrderByDescending(x => x.CreatedAt).ToList();
+        var sorted = entities.OrderByDescending(x => x.CreatedAt).ToList();
+        var totalCount = sorted.Count;
+        var paged = sorted
+            .Skip((paginationParameters.PageNumber - 1) * paginationParameters.PageSize)
+            .Take(paginationParameters.PageSize)
+            .ToList();
 
-        return _mapper.Map<List<PostDto>>(entities);
+        return new PagedResult<PostDto>(
+            _mapper.Map<List<PostDto>>(paged),
+            totalCount,
+            paginationParameters.PageNumber,
+            paginationParameters.PageSize
+        );
     }
 
-    public async Task<List<PostDto>> GetPostsBySearchQueryAsync(string query, CancellationToken cancellationToken)
+    public async Task<PagedResult<PostDto>> GetPostsBySearchQueryAsync(string? query, PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        query = query.ToLower();
-        
-        var entities = await _unitOfWork.PostsRepository.GetAsync(x =>
-            x.Title.Contains(query), cancellationToken);
+        var searchQuery = query?.ToLower();
+        var pagedEntities = await _unitOfWork.PostsRepository.GetPagedAsync(x =>
+            string.IsNullOrEmpty(searchQuery) || x.Title.ToLower().Contains(searchQuery), paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
 
-        return _mapper.Map<List<PostDto>>(entities);
+        return new PagedResult<PostDto>(
+            _mapper.Map<List<PostDto>>(pagedEntities.Items),
+            pagedEntities.TotalCount,
+            pagedEntities.PageNumber,
+            pagedEntities.PageSize
+        );
     }
 }
