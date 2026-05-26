@@ -61,21 +61,21 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
         _logger.LogInformation("User successfully updated {@User}.", entity);
     }
 
-    public async Task UpdateUserVisibilityAsync(Guid userId, VisibilityType visibility, CancellationToken cancellationToken)
+    public async Task UpdateUserVisibilityAsync(VisibilityType visibility, CancellationToken cancellationToken)
     {
         var permissions =
-            await _permissionsService.GetUserPermissionsAsync("users", UserId, userId, cancellationToken);
+            await _permissionsService.GetUserPermissionsAsync("users", UserId, UserId, cancellationToken);
 
         if (!permissions.Contains(PermissionTypes.Write))
         {
             throw new NoPermissionException("У вас недостаточно прав для этого действия.");
         }
         
-        var entity = await _unitOfWork.UsersRepository.GetByIdAsync(userId, cancellationToken);
+        var entity = await _unitOfWork.UsersRepository.GetByIdAsync(UserId, cancellationToken);
 
         if (entity == null)
         {
-            throw new NotFoundException($"Пользователь {userId} не найден.");
+            throw new NotFoundException($"Пользователь {UserId} не найден.");
         }
         
         entity.Visibility = visibility;
@@ -108,15 +108,15 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
         _logger.LogInformation("Users deleted");
     }
 
-    public async Task ChangeSubscriptionStatusAsync(Guid subscriberId, Guid targetId, CancellationToken cancellationToken)
+    public async Task ChangeSubscriptionStatusAsync(Guid targetId, CancellationToken cancellationToken)
     {
-        var existingSubscription = await _unitOfWork.SubscriptionsRepository.GetBySubscriberAndTargetIds(subscriberId, targetId, cancellationToken);
+        var existingSubscription = await _unitOfWork.SubscriptionsRepository.GetBySubscriberAndTargetIds(UserId, targetId, cancellationToken);
 
         if (existingSubscription == null)
         {
             var subscription = new Subscription
             {
-                SubscriberId = subscriberId,
+                SubscriberId = UserId,
                 TargetUserId = targetId
             };
 

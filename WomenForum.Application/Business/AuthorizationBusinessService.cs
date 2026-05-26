@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Templates.Business;
 using WomenForum.Business.Interfaces;
+using WomenForum.Domain.Enums;
 using WomenForum.Domain.Models;
 using WomenForum.Exceptions;
 using WomenForum.Helpers;
@@ -55,9 +56,16 @@ public class AuthorizationBusinessService(
         userEntity.PasswordHash = PasswordHasher.HashPassword(request.Password);
         userEntity.LastLogin = DateTime.UtcNow;
 
+        var userSettings = new UserSettings()
+        {
+            Theme = Theme.Dark,
+            UserId = userEntity.Id
+        };
+
         try
         {
             await unitOfWork.UsersRepository.AddAsync(userEntity,cancellationToken);
+            await unitOfWork.UserSettingsRepository.AddAsync(userSettings, cancellationToken);
         }
         catch
         {

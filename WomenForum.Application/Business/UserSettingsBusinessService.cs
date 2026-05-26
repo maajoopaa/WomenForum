@@ -25,21 +25,13 @@ public class UserSettingsBusinessService : BaseBusinessService, IUserSettingsBus
         _permissionsService = permissionsService;
     }
 
-    public async Task UpdateUserSettingsAsync(Guid userId, UpdateUserSettingsRequest request, CancellationToken cancellationToken)
+    public async Task UpdateUserSettingsAsync(UpdateUserSettingsRequest request, CancellationToken cancellationToken)
     {
-        var permissions =
-            await _permissionsService.GetUserPermissionsAsync("users", UserId, userId, cancellationToken);
-
-        if (!permissions.Contains(PermissionTypes.Write))
-        {
-            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
-        }
-        
-        var user = await _unitOfWork.UsersRepository.GetByIdAsync(userId, cancellationToken);
+        var user = await _unitOfWork.UsersRepository.GetByIdAsync(UserId, cancellationToken);
 
         if (user == null)
         {
-            throw new NotFoundException($"Пользователь {userId} не найден.");
+            throw new NotFoundException($"Пользователь {UserId} не найден.");
         }
 
         var settings = user.UserSettings;

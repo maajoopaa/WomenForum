@@ -6,5 +6,5 @@ namespace WomenForum.Business.Interfaces;
 
 public interface IUserSettingsBusinessService : IBaseBusinessService
 {
-    public Task UpdateUserSettingsAsync(Guid userId, UpdateUserSettingsRequest request, CancellationToken cancellationToken);
+    public Task UpdateUserSettingsAsync(UpdateUserSettingsRequest request, CancellationToken cancellationToken);
 }

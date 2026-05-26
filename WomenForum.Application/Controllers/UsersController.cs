@@ -43,13 +43,12 @@ public class UsersController : ControllerBase
     }
 
     [Authorize]
-    [HttpPatch("{userId:guid}/visibility")]
+    [HttpPatch("visibility")]
     public async Task<ActionResult> UpdateVisibilityAsync(
-        Guid userId,
         [FromQuery] VisibilityType visibility,
         CancellationToken cancellationToken)
     {
-        await _usersBusinessService.UpdateUserVisibilityAsync(userId, visibility, cancellationToken);
+        await _usersBusinessService.UpdateUserVisibilityAsync(visibility, cancellationToken);
 
         return NoContent();
     }
@@ -82,23 +81,22 @@ public class UsersController : ControllerBase
     }
     
     [Authorize]
-    [HttpPut("{userId:guid}/settings")]
-    public async Task<ActionResult> UpdateSettingsAsync(Guid userId, [FromBody] UpdateUserSettingsRequest request,
+    [HttpPut("settings")]
+    public async Task<ActionResult> UpdateSettingsAsync([FromBody] UpdateUserSettingsRequest request,
         CancellationToken cancellationToken)
     {
-        await _userSettingsBusinessService.UpdateUserSettingsAsync(userId,request, cancellationToken);
+        await _userSettingsBusinessService.UpdateUserSettingsAsync(request, cancellationToken);
 
         return NoContent();
     }
 
     [Authorize]
-    [HttpPut("{userId:guid}/subscriptions/{targetId:guid}")]
+    [HttpPut("subscriptions/{targetId:guid}")]
     public async Task<ActionResult> ChangeSubscriptionStatusAsync(
-        Guid userId,
         Guid targetId,
         CancellationToken cancellationToken)
     {
-        await _usersBusinessService.ChangeSubscriptionStatusAsync(userId, targetId, cancellationToken);
+        await _usersBusinessService.ChangeSubscriptionStatusAsync(targetId, cancellationToken);
 
         return NoContent();
     }
