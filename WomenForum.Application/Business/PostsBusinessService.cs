@@ -34,23 +34,16 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
     public async Task<PostDto> AddPostAsync(CreatePostRequest request, CancellationToken cancellationToken)
     {
         var entity = _mapper.Map<Post>(request);
-
-        if (entity.CommunityId == null)
-        {
-            entity.AuthorUserId = UserId;
-
-            await _unitOfWork.PostsRepository.AddAsync(entity, cancellationToken);
-            
-            _logger.LogInformation("Post created");
-            
-            return _mapper.Map<PostDto>(entity);
-        }
+        entity.AuthorUserId = UserId;
         
-        var community = await _unitOfWork.CommunitiesRepository.GetByIdAsync(entity.CommunityId.Value, cancellationToken);
-
-        if (community == null)
+        if (entity.CommunityId != null)
         {
-            throw new NotFoundException($"Сообщество {entity.CommunityId} не найдено.");
+            var community = await _unitOfWork.CommunitiesRepository.GetByIdAsync(entity.CommunityId.Value, cancellationToken);
+            
+            if (community == null)
+            {
+                throw new NotFoundException($"Сообщество {entity.CommunityId} не найдено.");
+            }
         }
         
         await _unitOfWork.PostsRepository.AddAsync(entity, cancellationToken);
@@ -154,7 +147,7 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
 
     public async Task<PagedResult<PostDto>> GetPopularPostsAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var entities = await _unitOfWork.PostsRepository.GetAsync(null, cancellationToken);
+        var entities = await _unitOfWork.PostsRepository.GetAsync(x => x.DeletedAt == null, cancellationToken);
         
         var sorted = entities.OrderByDescending(x => x.Likes.Count + x.Comments.Count).ToList();
         var totalCount = sorted.Count;
@@ -173,7 +166,7 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
 
     public async Task<PagedResult<PostDto>> GetRecentPostsAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var entities = await _unitOfWork.PostsRepository.GetAsync(null, cancellationToken);
+        var entities = await _unitOfWork.PostsRepository.GetAsync(x => x.DeletedAt == null, cancellationToken);
         
         var sorted = entities.OrderByDescending(x => x.CreatedAt).ToList();
         var totalCount = sorted.Count;

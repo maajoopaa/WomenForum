@@ -58,7 +58,8 @@ public class CommunitiesBusinessService : BaseBusinessService, ICommunitiesBusin
 
         await _unitOfWork.CommunityMembersRepository.AddAsync(communityMember, cancellationToken);
         
-        return _mapper.Map<CommunityDto>(community);
+        return _mapper.Map<CommunityDto>(community, opts => 
+            opts.Items["CurrentUserId"] = UserId);
     }
 
     public async Task UpdateCommunityAsync(Guid communityId, UpdateCommunityRequest request, CancellationToken cancellationToken)
@@ -122,10 +123,11 @@ public class CommunitiesBusinessService : BaseBusinessService, ICommunitiesBusin
 
     public async Task<PagedResult<CommunityDto>> GetAllCommunitiesAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var pagedEntities = await _unitOfWork.CommunitiesRepository.GetPagedAsync(null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
+        var pagedEntities = await _unitOfWork.CommunitiesRepository.GetPagedAsync(x => x.DeletedAt == null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
         
         return new PagedResult<CommunityDto>(
-            _mapper.Map<List<CommunityDto>>(pagedEntities.Items),
+            _mapper.Map<List<CommunityDto>>(pagedEntities.Items, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize
@@ -137,7 +139,9 @@ public class CommunitiesBusinessService : BaseBusinessService, ICommunitiesBusin
         var pagedEntities = await _unitOfWork.CommunitiesRepository.GetPagedAsync(x => x.CreatedById == userId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
         
         return new PagedResult<CommunityDto>(
-            _mapper.Map<List<CommunityDto>>(pagedEntities.Items),
+            _mapper.Map<List<CommunityDto>>(pagedEntities.Items,
+                opts => 
+                    opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize
@@ -155,7 +159,9 @@ public class CommunitiesBusinessService : BaseBusinessService, ICommunitiesBusin
         );
         
         return new PagedResult<CommunityDto>(
-            _mapper.Map<List<CommunityDto>>(pagedEntities.Items),
+            _mapper.Map<List<CommunityDto>>(pagedEntities.Items,
+                opts => 
+                    opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize
@@ -174,7 +180,9 @@ public class CommunitiesBusinessService : BaseBusinessService, ICommunitiesBusin
             .ToList();
 
         return new PagedResult<CommunityDto>(
-            _mapper.Map<List<CommunityDto>>(paged),
+            _mapper.Map<List<CommunityDto>>(paged,
+                opts => 
+                    opts.Items["CurrentUserId"] = UserId),
             totalCount,
             paginationParameters.PageNumber,
             paginationParameters.PageSize

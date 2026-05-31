@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using WomenForum.Domain.Models;
 using WomenForum.Models;
 using WomenForum.Models.Requests;
@@ -34,9 +34,18 @@ public class MappingProfile : Profile
         CreateMap<UserSettings, UserSettingsDto>();
 
         CreateMap<Comment, CommentDto>();
-        
-        CreateMap<Community, CommunityDto>();
-        
+
+        CreateMap<Community, CommunityDto>()
+            .ForMember(x => x.Subscribers, y => y.MapFrom(z => z.Members.Count))
+            .ForMember(dest => dest.IsCurrentUserSubscriber, opt => opt.MapFrom((src, dest, destMember, context) =>
+            {
+                if (context.Items.TryGetValue("CurrentUserId", out var userIdObj) && userIdObj is Guid currentUserId)
+                {
+                    return src.Members.Any(m => m.UserId == currentUserId);
+                }
+                return false;
+            }));
+            
         CreateMap<CommunityJoinRequest, CommunityJoinRequestDto>();
         
         CreateMap<CommunityMember, CommunityMemberDto>();

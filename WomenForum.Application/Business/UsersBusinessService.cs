@@ -176,7 +176,7 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
 
     public async Task<PagedResult<UserDto>> GetAllUsersAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var pagedEntities = await _unitOfWork.UsersRepository.GetPagedAsync(null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
+        var pagedEntities = await _unitOfWork.UsersRepository.GetPagedAsync(x => x.DeletedAt == null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
 
         return new PagedResult<UserDto>(
             _mapper.Map<List<UserDto>>(pagedEntities.Items),

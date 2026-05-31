@@ -97,7 +97,7 @@ public class DiscussionThreadsBusinessService : BaseBusinessService, IDiscussion
 
     public async Task<PagedResult<DiscussionThreadDto>> GetAllDiscussionThreadsAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
-        var pagedEntities = await _unitOfWork.DiscussionThreadsRepository.GetPagedAsync(null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
+        var pagedEntities = await _unitOfWork.DiscussionThreadsRepository.GetPagedAsync(x => x.DeletedAt == null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
         
         return new PagedResult<DiscussionThreadDto>(
             _mapper.Map<List<DiscussionThreadDto>>(pagedEntities.Items),

@@ -1,4 +1,4 @@
-﻿using Templates.Models;
+using Templates.Models;
 
 namespace WomenForum.Models;
 
