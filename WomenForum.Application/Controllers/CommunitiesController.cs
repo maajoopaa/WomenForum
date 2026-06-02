@@ -118,9 +118,9 @@ public class CommunitiesController : ControllerBase
 
     [Authorize]
     [HttpDelete("{communityId:guid}/members")]
-    public async Task<ActionResult> DeleteMembersAsync([FromQuery] List<Guid> memberIds, CancellationToken cancellationToken)
+    public async Task<ActionResult> DeleteMembersAsync(Guid communityId, [FromQuery] List<Guid> memberIds, CancellationToken cancellationToken)
     {
-        await _communityMembersBusinessService.DeleteCommunityMembersAsync(memberIds, cancellationToken);
+        await _communityMembersBusinessService.DeleteCommunityMembersAsync(communityId, memberIds, cancellationToken);
 
         return NoContent();
     }
@@ -151,7 +151,7 @@ public class CommunitiesController : ControllerBase
     [Authorize]
     [HttpPatch("{communityId:guid}/join-requests/{requestId:guid}")]
     public async Task<ActionResult> ChangeJoinRequestStatusAsync(Guid requestId, [FromQuery] JoinRequestStatus status,
-        [FromQuery] string message,
+        [FromQuery] string? message,
         CancellationToken cancellationToken)
     {
         await _communityJoinRequestsBusinessService.ChangeJoinRequestStatusAsync(requestId, status, message, cancellationToken);

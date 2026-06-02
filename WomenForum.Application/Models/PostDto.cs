@@ -15,6 +15,7 @@ public class PostDto : BaseDtoWithId
     public DateTime? DeletedAt { get; set; }
     
     public UserDto AuthorUser { get; set; } = null!;
+    public CommunityDto? Community { get; set; }
 
     public List<LikeDto> Likes { get; set; } = [];
 

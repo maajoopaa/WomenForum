@@ -54,17 +54,17 @@ public class CommunityMembersBusinessService : BaseBusinessService, ICommunityMe
         _logger.LogInformation("Community member successfully changed.");
     }
 
-    public async Task DeleteCommunityMembersAsync(List<Guid> memberIds, CancellationToken cancellationToken)
+    public async Task DeleteCommunityMembersAsync(Guid communityId, List<Guid> memberIds, CancellationToken cancellationToken)
     {
         var entities = await _unitOfWork.CommunityMembersRepository.GetAsync(x =>
-            memberIds.Contains(x.Id), cancellationToken);
+            memberIds.Contains(x.UserId) && x.CommunityId == communityId, cancellationToken);
 
         foreach (var member in entities)
         {
             var permissions =
                 await _permissionsService.GetUserPermissionsAsync("community-members", UserId, member.Id, cancellationToken);
 
-            if (!permissions.Contains(PermissionTypes.Delete))
+            if (!permissions.Contains(PermissionTypes.Delete) && UserId != member.UserId)
             {
                 throw new NoPermissionException("У вас недостаточно прав для этого действия.");
             }

@@ -50,7 +50,8 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
         
         _logger.LogInformation("Post created");
         
-        return _mapper.Map<PostDto>(entity);
+        return _mapper.Map<PostDto>(entity, opts => 
+            opts.Items["CurrentUserId"] = UserId);
     }
 
     public async Task UpdatePostAsync(Guid postId, UpdatePostRequest request, CancellationToken cancellationToken)
@@ -114,10 +115,11 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
         }
         
         var pagedEntities = await _unitOfWork.PostsRepository.GetPagedAsync(x =>
-            x.CommunityId == communityId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
+            x.CommunityId == communityId && x.DeletedAt == null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
 
         return new PagedResult<PostDto>(
-            _mapper.Map<List<PostDto>>(pagedEntities.Items),
+            _mapper.Map<List<PostDto>>(pagedEntities.Items, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize
@@ -135,10 +137,11 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
         }
         
         var pagedEntities = await _unitOfWork.PostsRepository.GetPagedAsync(x =>
-            x.AuthorUserId == userId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
+            x.AuthorUserId == userId && x.DeletedAt == null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
 
         return new PagedResult<PostDto>(
-            _mapper.Map<List<PostDto>>(pagedEntities.Items),
+            _mapper.Map<List<PostDto>>(pagedEntities.Items, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize
@@ -157,7 +160,8 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
             .ToList();
 
         return new PagedResult<PostDto>(
-            _mapper.Map<List<PostDto>>(paged),
+            _mapper.Map<List<PostDto>>(paged, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             totalCount,
             paginationParameters.PageNumber,
             paginationParameters.PageSize
@@ -176,7 +180,8 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
             .ToList();
 
         return new PagedResult<PostDto>(
-            _mapper.Map<List<PostDto>>(paged),
+            _mapper.Map<List<PostDto>>(paged, opts => 
+                                                              opts.Items["CurrentUserId"] = UserId),
             totalCount,
             paginationParameters.PageNumber,
             paginationParameters.PageSize
@@ -187,10 +192,11 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
     {
         var searchQuery = query?.ToLower();
         var pagedEntities = await _unitOfWork.PostsRepository.GetPagedAsync(x =>
-            string.IsNullOrEmpty(searchQuery) || x.Title.ToLower().Contains(searchQuery), paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
+            (string.IsNullOrEmpty(searchQuery) || x.Title.ToLower().Contains(searchQuery)) && x.DeletedAt == null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
 
         return new PagedResult<PostDto>(
-            _mapper.Map<List<PostDto>>(pagedEntities.Items),
+            _mapper.Map<List<PostDto>>(pagedEntities.Items, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize

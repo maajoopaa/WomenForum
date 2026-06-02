@@ -106,8 +106,21 @@ public class CommunityJoinRequestsBusinessService : BaseBusinessService, ICommun
         }
         
         entity.Status = status;
+        entity.ReviewedById = UserId;
+        entity.ReviewedAt = DateTime.UtcNow;
         
         await _unitOfWork.CommunityJoinRequestsRepository.UpdateAsync(entity, cancellationToken);
+
+        if (status == JoinRequestStatus.Approved)
+        {
+            var member = new CommunityMember
+            {
+                UserId = entity.UserId,
+                CommunityId = entity.CommunityId
+            };
+            
+            await _unitOfWork.CommunityMembersRepository.AddAsync(member,cancellationToken);
+        }
         
         _logger.LogInformation("Community join request successfully changed.");
     }

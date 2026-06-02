@@ -53,6 +53,11 @@ public class BaseRepository<TEntity, TContext> : IBaseRepository<TEntity>
         return await DbSet.Where(predicate ?? (entity => true)).ToListAsync(cancellationToken);
     }
 
+    public async Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken)
+    {
+        return await DbSet.FirstOrDefaultAsync(predicate, cancellationToken);
+    }
+
     public virtual async Task<PagedResult<TEntity>> GetPagedAsync(
         Expression<Func<TEntity, bool>>? predicate,
         int pageNumber,

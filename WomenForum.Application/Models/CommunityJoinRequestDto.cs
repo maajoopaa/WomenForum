@@ -14,7 +14,7 @@ public class CommunityJoinRequestDto : BaseDtoWithId
 
     public DateTime? ReviewedAt { get; set; }
 
-    public UserDto ReviewedBy { get; set; } = null!;
+    public UserDto? ReviewedBy { get; set; }
 
     public string? Message { get; set; }
 }

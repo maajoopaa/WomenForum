@@ -12,6 +12,8 @@ public interface IBaseRepository<TEntity> where TEntity : BaseDbEntityWithId
     Task DeleteAsync(TEntity entity, CancellationToken cancellationToken);
     Task DeleteRangeAsync(List<TEntity> entities, CancellationToken cancellationToken);
     Task<List<TEntity>> GetAsync(Expression<Func<TEntity, bool>>? predicate, CancellationToken cancellationToken);
+    Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken);
     Task<PagedResult<TEntity>> GetPagedAsync(Expression<Func<TEntity, bool>>? predicate, int pageNumber, int pageSize, CancellationToken cancellationToken);
     Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+    
 }

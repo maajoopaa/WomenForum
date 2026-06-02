@@ -17,8 +17,8 @@ public class CommunityJoinRequest : BaseDbEntityWithId
 
     public DateTime? ReviewedAt { get; set; }
 
-    public Guid ReviewedById { get; set; }
-    public virtual User ReviewedBy { get; set; } = null!;
+    public Guid? ReviewedById { get; set; }
+    public virtual User? ReviewedBy { get; set; }
 
     public string? Message { get; set; }
 }

@@ -16,10 +16,6 @@ public class CreateCommunityRequestValidator : AbstractValidator<CreateCommunity
             .NotEmpty().WithMessage(ValidationMessages.Required)
             .MaximumLength(1000).WithMessage(ValidationMessages.MaxLength);
 
-        RuleFor(x => x.Avatar)
-            .MaximumLength(2048).WithMessage(ValidationMessages.MaxLength)
-            .When(x => !string.IsNullOrEmpty(x.Avatar));
-
         RuleFor(x => x.Visibility)
             .IsInEnum().WithMessage(ValidationMessages.InvalidValue);
 
