@@ -19,6 +19,7 @@ public class WomenForumDbContext(DbContextOptions<WomenForumDbContext> options) 
     public DbSet<Subscription> Subscriptions { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<UserSettings> UserSettings { get; set; }
+    public DbSet<Warning> Warnings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

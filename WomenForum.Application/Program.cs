@@ -87,6 +87,7 @@ builder.Services.AddTransient<IReportsRepository,ReportsRepository>();
 builder.Services.AddTransient<ISubscriptionsRepository,SubscriptionsRepository>();
 builder.Services.AddTransient<IUserSettingsRepository,UserSettingsRepository>();
 builder.Services.AddTransient<IUsersRepository,UsersRepository>();
+builder.Services.AddTransient<IWarningsRepository,WarningsRepository>();
 
 //Unit of work
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
@@ -106,6 +107,7 @@ builder.Services.AddTransient<IReportsBusinessService, ReportsBusinessService>()
 builder.Services.AddTransient<IUsersBusinessService, UsersBusinessService>();
 builder.Services.AddTransient<IUserSettingsBusinessService, UserSettingsBusinessService>();
 builder.Services.AddTransient<IPermissionsService, PermissionsService>();
+builder.Services.AddTransient<IWarningsBusinessService, WarningsBusinessService>();
 
 //Jwt helper
 builder.Services.AddTransient<JWTHelper>();

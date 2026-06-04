@@ -47,5 +47,7 @@ public class User : BaseDbEntityWithId
     
     public virtual List<Post> Posts { get; set; } = [];
     
+    public virtual List<Warning> Warnings { get; set; } = [];
+    
     public virtual List<Report> Reports { get; set; } = [];
 }

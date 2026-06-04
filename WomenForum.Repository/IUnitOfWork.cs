@@ -12,6 +12,7 @@ public interface IUnitOfWork
     IDiscussionThreadsRepository DiscussionThreadsRepository { get; set; }
     ILikesRepository LikesRepository { get; set; }
     IMessagesRepository MessagesRepository { get; set; }
+    IWarningsRepository WarningsRepository { get; set; }
     INotificationsRepository NotificationsRepository { get; set; }
     IPostsRepository PostsRepository { get; set; }
     IReportsRepository ReportsRepository { get; set; }

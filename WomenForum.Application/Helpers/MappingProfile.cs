@@ -19,6 +19,8 @@ public class MappingProfile : Profile
         
         CreateMap<CreateMessageRequest, Message>();
         
+        CreateMap<CreateWarningRequest, Warning>();
+        
         CreateMap<CreateDiscussionThreadRequest, DiscussionThread>();
         
         CreateMap<CreatePostRequest, Post>();
@@ -38,6 +40,8 @@ public class MappingProfile : Profile
             }));
         
         CreateMap<Category, CategoryDto>();
+        
+        CreateMap<Warning, WarningDto>();
         
         CreateMap<UserSettings, UserSettingsDto>();
 

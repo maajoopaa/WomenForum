@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WomenForum.Database;
@@ -11,9 +12,11 @@ using WomenForum.Database;
 namespace WomenForum.Database.Migrations
 {
     [DbContext(typeof(WomenForumDbContext))]
-    partial class WomenForumDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260604184802_AddWarningsTable")]
+    partial class AddWarningsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -769,7 +772,7 @@ namespace WomenForum.Database.Migrations
             modelBuilder.Entity("WomenForum.Domain.Models.Warning", b =>
                 {
                     b.HasOne("WomenForum.Domain.Models.User", "User")
-                        .WithMany("Warnings")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -823,8 +826,6 @@ namespace WomenForum.Database.Migrations
 
                     b.Navigation("UserSettings")
                         .IsRequired();
-
-                    b.Navigation("Warnings");
                 });
 #pragma warning restore 612, 618
         }

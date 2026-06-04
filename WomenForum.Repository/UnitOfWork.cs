@@ -10,7 +10,7 @@ public class UnitOfWork : IUnitOfWork
         ICommunityJoinRequestsRepository communityJoinRequestsRepository, ICommunityMembersRepository communityMembersRepository,
         IDiscussionThreadsRepository discussionThreadsRepository, IPostsRepository postsRepository,
         ILikesRepository likesRepository, IMessagesRepository messagesRepository, INotificationsRepository notificationsRepository,
-        IUserSettingsRepository userSettingsRepository)
+        IUserSettingsRepository userSettingsRepository, IWarningsRepository warningsRepository)
     {
         CategoriesRepository = categoriesRepository;
         CommentsRepository = commentsRepository;
@@ -26,6 +26,7 @@ public class UnitOfWork : IUnitOfWork
         MessagesRepository = messagesRepository;
         NotificationsRepository = notificationsRepository;
         UserSettingsRepository = userSettingsRepository;
+        WarningsRepository = warningsRepository;
     }
     
     public ICategoriesRepository CategoriesRepository { get; set; }
@@ -36,6 +37,7 @@ public class UnitOfWork : IUnitOfWork
     public IDiscussionThreadsRepository DiscussionThreadsRepository { get; set; }
     public ILikesRepository LikesRepository { get; set; }
     public IMessagesRepository MessagesRepository { get; set; }
+    public IWarningsRepository WarningsRepository { get; set; }
     public INotificationsRepository NotificationsRepository { get; set; }
     public IPostsRepository PostsRepository { get; set; }
     public IReportsRepository ReportsRepository { get; set; }
