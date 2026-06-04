@@ -16,6 +16,12 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
             
             await HandleExceptionAsync(context, ex.Message,ex.StatusCode);
         }
+        catch (BadRequestException ex)
+        {
+            logger.LogError(ex, ex.Message);
+            
+            await HandleExceptionAsync(context, ex.Message,ex.StatusCode);
+        }
         catch (NoPermissionException ex)
         {
             logger.LogError(ex, ex.Message);

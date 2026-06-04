@@ -56,7 +56,14 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
         entity.BirthDate = request.BirthDate;
         entity.Username = request.Username;
         
-        await _unitOfWork.UsersRepository.UpdateAsync(entity, cancellationToken);
+        try 
+        {
+            await _unitOfWork.UsersRepository.UpdateAsync(entity, cancellationToken);
+        } 
+        catch
+        {
+            throw new BadRequestException("Такой пользователь уже существует.");
+        }
         
         _logger.LogInformation("User successfully updated {@User}.", entity);
     }

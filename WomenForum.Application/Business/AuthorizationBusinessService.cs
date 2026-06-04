@@ -71,7 +71,7 @@ public class AuthorizationBusinessService(
         }
         catch
         {
-            throw new NotFoundException("Такой пользователь уже существует.");
+            throw new BadRequestException("Такой пользователь уже существует.");
         }
 
         return await LoginAsync(new LoginRequest
