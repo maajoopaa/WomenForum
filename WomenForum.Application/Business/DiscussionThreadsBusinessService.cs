@@ -41,7 +41,8 @@ public class DiscussionThreadsBusinessService : BaseBusinessService, IDiscussion
 
         _logger.LogInformation("DiscussionThread added");
 
-        return _mapper.Map<DiscussionThreadDto>(entity);
+        return _mapper.Map<DiscussionThreadDto>(entity, opts => 
+            opts.Items["CurrentUserId"] = UserId);
     }
 
     public async Task UpdateDiscussionThreadAsync(Guid discussionThreadId, UpdateDiscussionThreadRequest request,
@@ -100,7 +101,8 @@ public class DiscussionThreadsBusinessService : BaseBusinessService, IDiscussion
         var pagedEntities = await _unitOfWork.DiscussionThreadsRepository.GetPagedAsync(x => x.DeletedAt == null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
         
         return new PagedResult<DiscussionThreadDto>(
-            _mapper.Map<List<DiscussionThreadDto>>(pagedEntities.Items),
+            _mapper.Map<List<DiscussionThreadDto>>(pagedEntities.Items, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize
@@ -119,7 +121,8 @@ public class DiscussionThreadsBusinessService : BaseBusinessService, IDiscussion
         );
         
         return new PagedResult<DiscussionThreadDto>(
-            _mapper.Map<List<DiscussionThreadDto>>(pagedEntities.Items),
+            _mapper.Map<List<DiscussionThreadDto>>(pagedEntities.Items, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize
@@ -138,7 +141,8 @@ public class DiscussionThreadsBusinessService : BaseBusinessService, IDiscussion
             .ToList();
         
         return new PagedResult<DiscussionThreadDto>(
-            _mapper.Map<List<DiscussionThreadDto>>(paged),
+            _mapper.Map<List<DiscussionThreadDto>>(paged, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             totalCount,
             paginationParameters.PageNumber,
             paginationParameters.PageSize
@@ -157,7 +161,8 @@ public class DiscussionThreadsBusinessService : BaseBusinessService, IDiscussion
             .ToList();
         
         return new PagedResult<DiscussionThreadDto>(
-            _mapper.Map<List<DiscussionThreadDto>>(paged),
+            _mapper.Map<List<DiscussionThreadDto>>(paged, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             totalCount,
             paginationParameters.PageNumber,
             paginationParameters.PageSize

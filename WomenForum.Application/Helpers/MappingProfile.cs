@@ -27,7 +27,15 @@ public class MappingProfile : Profile
 
         CreateMap<User, UserDto>()
             .ForMember(x => x.FollowingCount, y => y.MapFrom(z => z.Following.Count))
-            .ForMember(x => x.FollowersCount, y => y.MapFrom(z => z.Followers.Count));
+            .ForMember(x => x.FollowersCount, y => y.MapFrom(z => z.Followers.Count))
+            .ForMember(dest => dest.IsCurrentUserSubscriber, opt => opt.MapFrom((src, dest, destMember, context) =>
+            {
+                if (context.Items.TryGetValue("CurrentUserId", out var userIdObj) && userIdObj is Guid currentUserId)
+                {
+                    return src.Followers.Any(m => m.SubscriberId == currentUserId);
+                }
+                return false;
+            }));
         
         CreateMap<Category, CategoryDto>();
         
@@ -55,8 +63,9 @@ public class MappingProfile : Profile
         CreateMap<Like, LikeDto>();
 
         CreateMap<Message, MessageDto>()
-            .ForMember(x => x.ReplyCount, y => y.MapFrom(z => z.Replies.Count));
-        
+            .ForMember(x => x.ReplyCount, y => y.MapFrom(z => z.Replies.Count))
+            .ForMember(x => x.ParentMessage, y => y.MapFrom(z => z.ParentMessage));
+
         CreateMap<Notification, NotificationDto>();
         
         CreateMap<Post, PostDto>();

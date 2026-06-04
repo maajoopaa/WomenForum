@@ -114,7 +114,8 @@ public class CommunityMembersBusinessService : BaseBusinessService, ICommunityMe
                 x.CommunityId == communityId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
         
         return new PagedResult<CommunityMemberDto>(
-            _mapper.Map<List<CommunityMemberDto>>(pagedEntities.Items),
+            _mapper.Map<List<CommunityMemberDto>>(pagedEntities.Items, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize

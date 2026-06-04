@@ -46,7 +46,8 @@ public class AuthorizationBusinessService(
         return new AuthorizationResponse
         {
             Token = token,
-            User = mapper.Map<UserDto>(user)
+            User = mapper.Map<UserDto>(user, opts => 
+                opts.Items["CurrentUserId"] = user.Id)
         };
     }
 
@@ -55,6 +56,7 @@ public class AuthorizationBusinessService(
         var userEntity = mapper.Map<User>(request);
         userEntity.PasswordHash = PasswordHasher.HashPassword(request.Password);
         userEntity.LastLogin = DateTime.UtcNow;
+        userEntity.Visibility = VisibilityType.Public;
 
         var userSettings = new UserSettings()
         {

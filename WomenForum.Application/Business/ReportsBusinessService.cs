@@ -90,7 +90,8 @@ public class ReportsBusinessService : BaseBusinessService, IReportsBusinessServi
         
         _logger.LogInformation("Report created");
 
-        return _mapper.Map<ReportDto>(entity);
+        return _mapper.Map<ReportDto>(entity, opts => 
+            opts.Items["CurrentUserId"] = UserId);
     }
 
     public async Task ChangeReportStatusAsync(Guid reportId, ReportStatus status, CancellationToken cancellationToken)
@@ -130,7 +131,8 @@ public class ReportsBusinessService : BaseBusinessService, IReportsBusinessServi
         var pagedEntities = await _unitOfWork.ReportsRepository.GetPagedAsync(null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
 
         return new PagedResult<ReportDto>(
-            _mapper.Map<List<ReportDto>>(pagedEntities.Items),
+            _mapper.Map<List<ReportDto>>(pagedEntities.Items, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize

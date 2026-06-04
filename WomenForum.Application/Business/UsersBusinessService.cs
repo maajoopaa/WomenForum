@@ -82,7 +82,6 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
         
         await _unitOfWork.UsersRepository.UpdateAsync(entity, cancellationToken);
         
-        _logger.LogInformation("User successfully updated {@User}.", entity);
     }
 
     public async Task DeleteUsersAsync(List<Guid> userIds, CancellationToken cancellationToken)
@@ -146,7 +145,8 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
             x.SubscriberId == userId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
 
         return new PagedResult<SubscriptionDto>(
-            _mapper.Map<List<SubscriptionDto>>(pagedEntities.Items),
+            _mapper.Map<List<SubscriptionDto>>(pagedEntities.Items, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize
@@ -167,7 +167,8 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
             x.TargetUserId == userId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
 
         return new PagedResult<SubscriptionDto>(
-            _mapper.Map<List<SubscriptionDto>>(pagedEntities.Items),
+            _mapper.Map<List<SubscriptionDto>>(pagedEntities.Items, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize
@@ -179,10 +180,19 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
         var pagedEntities = await _unitOfWork.UsersRepository.GetPagedAsync(x => x.DeletedAt == null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
 
         return new PagedResult<UserDto>(
-            _mapper.Map<List<UserDto>>(pagedEntities.Items),
+            _mapper.Map<List<UserDto>>(pagedEntities.Items, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize
         );
+    }
+
+    public async Task<UserDto> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var user = await _unitOfWork.UsersRepository.GetByIdAsync(userId, cancellationToken);
+        
+        return _mapper.Map<UserDto>(user, opts => 
+            opts.Items["CurrentUserId"] = UserId);
     }
 }

@@ -100,7 +100,9 @@ public class MessagesBusinessService : BaseBusinessService, IMessagesBusinessSer
     public async Task<PagedResult<MessageDto>> GetMessagesByDiscussionThreadIdAsync(Guid discussionThreadId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
         var pagedEntities = await _unitOfWork.MessagesRepository.GetPagedAsync(x =>
-            x.DiscussionThreadId == discussionThreadId && x.ParentMessageId == null, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
+            x.DiscussionThreadId == discussionThreadId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
+
+        pagedEntities.Items = pagedEntities.Items.OrderBy(x => x.CreatedAt).ToList();
         
         return new PagedResult<MessageDto>(
             _mapper.Map<List<MessageDto>>(pagedEntities.Items),

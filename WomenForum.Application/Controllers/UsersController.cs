@@ -131,4 +131,12 @@ public class UsersController : ControllerBase
 
         return Ok(result);
     }
+    
+    [HttpGet("{userId:guid}")]
+    public async Task<ActionResult<UserDto>> GetByIdAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var result = await _usersBusinessService.GetUserByIdAsync(userId, cancellationToken);
+
+        return Ok(result);
+    }
 }

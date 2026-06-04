@@ -48,7 +48,8 @@ public class CommentsBusinessService : BaseBusinessService, ICommentsBusinessSer
         
         _logger.LogInformation("Comment successfully created");
         
-        return _mapper.Map<CommentDto>(comment);
+        return _mapper.Map<CommentDto>(comment, opts => 
+            opts.Items["CurrentUserId"] = UserId);
     }
 
     public async Task UpdateCommentAsync(Guid commentId, UpdateCommentRequest request, CancellationToken cancellationToken)

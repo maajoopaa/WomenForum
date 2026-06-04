@@ -33,4 +33,6 @@ public class UserDto : BaseDtoWithId
     public int FollowingCount { get; set; }
     
     public int FollowersCount { get; set; }
+    
+    public bool IsCurrentUserSubscriber {get;set;}
 }

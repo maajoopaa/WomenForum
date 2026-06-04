@@ -127,7 +127,9 @@ public class PermissionsService : IPermissionsService
                 
                 var resource = await _unitOfWork.UsersRepository.GetByIdAsync(resourceId, cancellationToken);
 
-                if (resource?.Followers.FirstOrDefault(x => x.Id == userId) != null || resource?.Visibility == VisibilityType.Public)
+                var follower = resource.Followers.FirstOrDefault(x => x.SubscriberId == userId);
+                
+                if (follower != null || resource?.Visibility == VisibilityType.Public)
                 {
                     return [PermissionTypes.Read];
                 }

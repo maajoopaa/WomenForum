@@ -80,7 +80,8 @@ public class CommunityJoinRequestsBusinessService : BaseBusinessService, ICommun
             x.CommunityId == communityId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
         
         return new PagedResult<CommunityJoinRequestDto>(
-            _mapper.Map<List<CommunityJoinRequestDto>>(pagedEntities.Items),
+            _mapper.Map<List<CommunityJoinRequestDto>>(pagedEntities.Items, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize

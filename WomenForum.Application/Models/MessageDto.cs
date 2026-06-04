@@ -10,5 +10,7 @@ public class MessageDto : BaseDtoWithId
     
     public UserDto CreatedBy { get; set; } = null!;
     
+    public MessageDto? ParentMessage { get; set; }
+    
     public int ReplyCount { get; set; }
 }
