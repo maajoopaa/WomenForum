@@ -47,4 +47,13 @@ public class WarningsController : ControllerBase
 
         return Created(string.Empty, result);
     }
+
+    [Authorize]
+    [HttpPatch("read")]
+    public async Task<ActionResult> ChangeWarningReadStatus([FromQuery]List<Guid> warningIds, CancellationToken cancellationToken)
+    {
+        await _warningsBusinessService.ChangeWarningReadStatus(warningIds, cancellationToken);
+
+        return NoContent();
+    }
 }

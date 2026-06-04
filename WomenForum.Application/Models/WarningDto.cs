@@ -8,5 +8,7 @@ public class WarningDto : BaseDtoWithId
     
     public UserDto User { get; set; } = null!;
     
+    public bool IsRead { get; set; }
+    
     public DateTime? DeletedAt { get; set; }
 }

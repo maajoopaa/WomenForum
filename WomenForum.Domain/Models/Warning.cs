@@ -10,5 +10,7 @@ public class Warning : BaseDbEntityWithId
 
     public virtual User User { get; set; } = null!;
     
+    public bool IsRead { get; set; }
+    
     public DateTime? DeletedAt { get; set; }
 }

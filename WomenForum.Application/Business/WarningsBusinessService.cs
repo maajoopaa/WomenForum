@@ -73,4 +73,25 @@ public class WarningsBusinessService : BaseBusinessService, IWarningsBusinessSer
             paginationParameters.PageSize
         );
     }
+
+    public async Task ChangeWarningReadStatus(List<Guid> warningIds, CancellationToken cancellationToken)
+    {
+        var warnings = new List<Warning>();
+        
+        foreach (var warningId in warningIds)
+        {
+            var warning = await _unitOfWork.WarningsRepository.GetByIdAsync(warningId, cancellationToken);
+            
+            if(warning == null) 
+            {
+                throw new NotFoundException($"Предупреждение {warningId} не найдено.");
+            }
+            
+            warning.IsRead = true;
+
+            warnings.Add(warning);
+        }
+
+        await _unitOfWork.WarningsRepository.UpdateRangeAsync(warnings, cancellationToken);
+    }
 }

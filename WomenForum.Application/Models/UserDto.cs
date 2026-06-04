@@ -26,6 +26,8 @@ public class UserDto : BaseDtoWithId
     
     public Role Role { get; set; }
     
+    public bool IsBanned {get;set;}
+    
     public VisibilityType Visibility { get; set; }
 
     public UserSettingsDto UserSettings { get; set; } = null!;

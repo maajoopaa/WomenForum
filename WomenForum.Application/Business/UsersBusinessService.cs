@@ -200,4 +200,26 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
         return _mapper.Map<UserDto>(user, opts => 
             opts.Items["CurrentUserId"] = UserId);
     }
+
+    public async Task ChangeUserBanStatus(Guid userId, bool isBanned, CancellationToken cancellationToken)
+    {
+        var permissions =
+            await _permissionsService.GetUserPermissionsAsync("users", UserId, userId, cancellationToken);
+
+        if (!permissions.Contains(PermissionTypes.Write))
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+
+        var entity = await _unitOfWork.UsersRepository.GetByIdAsync(userId, cancellationToken);
+
+        if (entity == null)
+        {
+            throw new NotFoundException($"Пользователь {userId} не найден.");
+        }
+        
+        entity.IsBanned = isBanned;
+
+        await _unitOfWork.UsersRepository.UpdateAsync(entity, cancellationToken);
+    }
 }

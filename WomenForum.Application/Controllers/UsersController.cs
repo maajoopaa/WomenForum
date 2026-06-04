@@ -139,4 +139,13 @@ public class UsersController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpPatch("{userId:guid}/ban")]
+    public async Task<ActionResult> ChangeUserBanStatus(Guid userId, [FromQuery] bool isBanned,
+        CancellationToken cancellationToken)
+    {
+        await _usersBusinessService.ChangeUserBanStatus(userId, isBanned, cancellationToken);
+
+        return NoContent();
+    }
 }

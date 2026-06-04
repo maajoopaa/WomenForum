@@ -28,6 +28,8 @@ public class User : BaseDbEntityWithId
     public Role Role { get; set; }
     
     public VisibilityType Visibility { get; set; }
+    
+    public bool IsBanned { get; set; }
 
     public virtual UserSettings UserSettings { get; set; } = null!;
     
