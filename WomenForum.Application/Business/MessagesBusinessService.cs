@@ -49,7 +49,8 @@ public class MessagesBusinessService : BaseBusinessService, IMessagesBusinessSer
         
         _logger.LogInformation("Message successfully added");
         
-        return _mapper.Map<MessageDto>(entity);
+        return _mapper.Map<MessageDto>(entity, opts => 
+            opts.Items["CurrentUserId"] = UserId);
     }
 
     public async Task UpdateMessageAsync(Guid messageId, UpdateMessageRequest request, CancellationToken cancellationToken)
@@ -105,7 +106,8 @@ public class MessagesBusinessService : BaseBusinessService, IMessagesBusinessSer
         pagedEntities.Items = pagedEntities.Items.OrderBy(x => x.CreatedAt).ToList();
         
         return new PagedResult<MessageDto>(
-            _mapper.Map<List<MessageDto>>(pagedEntities.Items),
+            _mapper.Map<List<MessageDto>>(pagedEntities.Items, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize
@@ -118,7 +120,8 @@ public class MessagesBusinessService : BaseBusinessService, IMessagesBusinessSer
             x.ParentMessageId == messageId, paginationParameters.PageNumber, paginationParameters.PageSize, cancellationToken);
         
         return new PagedResult<MessageDto>(
-            _mapper.Map<List<MessageDto>>(pagedReplies.Items),
+            _mapper.Map<List<MessageDto>>(pagedReplies.Items, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             pagedReplies.TotalCount,
             pagedReplies.PageNumber,
             pagedReplies.PageSize

@@ -28,9 +28,5 @@ public class UpdateUserRequestValidator : AbstractValidator<UpdateUserRequest>
         RuleFor(x => x.BirthDate)
             .LessThan(DateTime.UtcNow)
             .WithMessage(ValidationMessages.InvalidBirthDate);
-
-        RuleFor(x => x.Avatar)
-            .MaximumLength(2048).WithMessage(ValidationMessages.MaxLength)
-            .When(x => !string.IsNullOrEmpty(x.Avatar));
     }
 }

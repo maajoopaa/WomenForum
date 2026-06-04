@@ -64,8 +64,6 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
         {
             throw new BadRequestException("Такой пользователь уже существует.");
         }
-        
-        _logger.LogInformation("User successfully updated {@User}.", entity);
     }
 
     public async Task UpdateUserVisibilityAsync(VisibilityType visibility, CancellationToken cancellationToken)

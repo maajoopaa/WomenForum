@@ -85,6 +85,7 @@ public class ReportsBusinessService : BaseBusinessService, IReportsBusinessServi
         }
 
         entity.ReportedById = UserId;
+        entity.Status = ReportStatus.Pending;
         
         await _unitOfWork.ReportsRepository.AddAsync(entity, cancellationToken);
         
