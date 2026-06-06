@@ -1,4 +1,4 @@
-﻿using WomenForum.Repository.Repositories.Interfaces;
+using WomenForum.Repository.Repositories.Interfaces;
 
 namespace WomenForum.Repository;
 
@@ -10,7 +10,7 @@ public class UnitOfWork : IUnitOfWork
         ICommunityJoinRequestsRepository communityJoinRequestsRepository, ICommunityMembersRepository communityMembersRepository,
         IDiscussionThreadsRepository discussionThreadsRepository, IPostsRepository postsRepository,
         ILikesRepository likesRepository, IMessagesRepository messagesRepository, INotificationsRepository notificationsRepository,
-        IUserSettingsRepository userSettingsRepository, IWarningsRepository warningsRepository)
+        IUserSettingsRepository userSettingsRepository, IWarningsRepository warningsRepository, IUserActivitiesRepository userActivitiesRepository)
     {
         CategoriesRepository = categoriesRepository;
         CommentsRepository = commentsRepository;
@@ -27,6 +27,7 @@ public class UnitOfWork : IUnitOfWork
         NotificationsRepository = notificationsRepository;
         UserSettingsRepository = userSettingsRepository;
         WarningsRepository = warningsRepository;
+        UserActivitiesRepository = userActivitiesRepository;
     }
     
     public ICategoriesRepository CategoriesRepository { get; set; }
@@ -43,5 +44,6 @@ public class UnitOfWork : IUnitOfWork
     public IReportsRepository ReportsRepository { get; set; }
     public ISubscriptionsRepository SubscriptionsRepository { get; set; }
     public IUsersRepository UsersRepository { get; set; }
+    public IUserActivitiesRepository UserActivitiesRepository { get; set; }
     public IUserSettingsRepository UserSettingsRepository { get; set; }
 }

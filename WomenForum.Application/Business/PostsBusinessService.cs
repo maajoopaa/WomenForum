@@ -8,6 +8,7 @@ using WomenForum.Helpers.Interfaces;
 using WomenForum.Models;
 using WomenForum.Models.Requests;
 using WomenForum.Repository;
+using WomenForum.Domain.Enums;
 
 namespace WomenForum.Business;
 
@@ -17,18 +18,21 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
     private readonly IMapper _mapper;
     private readonly ILogger<PostsBusinessService> _logger;
     private readonly IPermissionsService _permissionsService;
+    private readonly IUserActivitiesBusinessService _userActivitiesBusinessService;
 
     public PostsBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
         ILogger<PostsBusinessService> logger,
-        IPermissionsService permissionsService) : base(httpContextAccessor)
+        IPermissionsService permissionsService,
+        IUserActivitiesBusinessService userActivitiesBusinessService) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
         _permissionsService = permissionsService;
+        _userActivitiesBusinessService = userActivitiesBusinessService;
     }
 
     public async Task<PostDto> AddPostAsync(CreatePostRequest request, CancellationToken cancellationToken)
@@ -47,6 +51,8 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
         }
         
         await _unitOfWork.PostsRepository.AddAsync(entity, cancellationToken);
+        
+        await _userActivitiesBusinessService.LogActivityAsync(ActivityType.CreatePost, "Создан пост", entity.Id, cancellationToken);
         
         _logger.LogInformation("Post created");
         
@@ -100,6 +106,8 @@ public class PostsBusinessService : BaseBusinessService, IPostsBusinessService
         entity.DeletedAt = DateTime.UtcNow;
         
         await _unitOfWork.PostsRepository.UpdateAsync(entity, cancellationToken);
+        
+        await _userActivitiesBusinessService.LogActivityAsync(ActivityType.DeletePost, "Пост удален", entity.Id, cancellationToken);
         
         _logger.LogInformation("Post deleted");
     }

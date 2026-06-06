@@ -77,5 +77,7 @@ public class MappingProfile : Profile
         CreateMap<Report, ReportDto>();
         
         CreateMap<Subscription, SubscriptionDto>();
+        
+        CreateMap<UserActivity, UserActivityDto>();
     }
 }

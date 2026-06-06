@@ -85,6 +85,7 @@ builder.Services.AddTransient<INotificationsRepository,NotificationsRepository>(
 builder.Services.AddTransient<IPostsRepository,PostsRepository>();
 builder.Services.AddTransient<IReportsRepository,ReportsRepository>();
 builder.Services.AddTransient<ISubscriptionsRepository,SubscriptionsRepository>();
+builder.Services.AddTransient<IUserActivitiesRepository,UserActivitiesRepository>();
 builder.Services.AddTransient<IUserSettingsRepository,UserSettingsRepository>();
 builder.Services.AddTransient<IUsersRepository,UsersRepository>();
 builder.Services.AddTransient<IWarningsRepository,WarningsRepository>();
@@ -102,8 +103,10 @@ builder.Services.AddTransient<ICommunityMembersBusinessService, CommunityMembers
 builder.Services.AddTransient<IDiscussionThreadsBusinessService, DiscussionThreadsBusinessService>();
 builder.Services.AddTransient<ILikesBusinessService, LikesBusinessService>();
 builder.Services.AddTransient<IMessagesBusinessService, MessagesBusinessService>();
+builder.Services.AddTransient<INotificationsBusinessService, NotificationsBusinessService>();
 builder.Services.AddTransient<IPostsBusinessService, PostsBusinessService>();
 builder.Services.AddTransient<IReportsBusinessService, ReportsBusinessService>();
+builder.Services.AddTransient<IUserActivitiesBusinessService, UserActivitiesBusinessService>();
 builder.Services.AddTransient<IUsersBusinessService, UsersBusinessService>();
 builder.Services.AddTransient<IUserSettingsBusinessService, UserSettingsBusinessService>();
 builder.Services.AddTransient<IPermissionsService, PermissionsService>();

@@ -18,18 +18,24 @@ public class ReportsBusinessService : BaseBusinessService, IReportsBusinessServi
     private readonly IMapper _mapper;
     private readonly ILogger<ReportsBusinessService> _logger;
     private readonly IPermissionsService _permissionsService;
+    private readonly IUserActivitiesBusinessService _userActivitiesBusinessService;
+    private readonly INotificationsBusinessService _notificationsBusinessService;
 
     public ReportsBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
         ILogger<ReportsBusinessService> logger,
-        IPermissionsService permissionsService) : base(httpContextAccessor)
+        IPermissionsService permissionsService,
+        IUserActivitiesBusinessService userActivitiesBusinessService,
+        INotificationsBusinessService notificationsBusinessService) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
         _permissionsService = permissionsService;
+        _userActivitiesBusinessService = userActivitiesBusinessService;
+        _notificationsBusinessService = notificationsBusinessService;
     }
 
     public async Task<ReportDto> AddReportAsync(CreateReportRequest request, CancellationToken cancellationToken)
@@ -89,6 +95,8 @@ public class ReportsBusinessService : BaseBusinessService, IReportsBusinessServi
         
         await _unitOfWork.ReportsRepository.AddAsync(entity, cancellationToken);
         
+        await _userActivitiesBusinessService.LogActivityAsync(ActivityType.Report, "Отправлена жалоба", entity.Id, cancellationToken);
+        
         _logger.LogInformation("Report created");
 
         return _mapper.Map<ReportDto>(entity, opts => 
@@ -115,6 +123,8 @@ public class ReportsBusinessService : BaseBusinessService, IReportsBusinessServi
         entity.Status = status;
         
         await _unitOfWork.ReportsRepository.UpdateAsync(entity, cancellationToken);
+        
+        await _notificationsBusinessService.SendNotificationAsync(entity.ReportedById, NotificationType.ReportStatusChanged, $"Статус вашей жалобы: {status}", NotificationSource.Report, entity.Id, UserId, cancellationToken);
         
         _logger.LogInformation("Report changed");
     }

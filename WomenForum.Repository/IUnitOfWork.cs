@@ -1,4 +1,4 @@
-﻿using WomenForum.Repository.Repositories.Interfaces;
+using WomenForum.Repository.Repositories.Interfaces;
 
 namespace WomenForum.Repository;
 
@@ -18,5 +18,6 @@ public interface IUnitOfWork
     IReportsRepository ReportsRepository { get; set; }
     ISubscriptionsRepository SubscriptionsRepository { get; set; }
     IUsersRepository UsersRepository { get; set; }
+    IUserActivitiesRepository UserActivitiesRepository { get; set; }
     IUserSettingsRepository UserSettingsRepository { get; set; }
 }

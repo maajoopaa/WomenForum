@@ -17,18 +17,24 @@ public class CommunityJoinRequestsBusinessService : BaseBusinessService, ICommun
     private readonly IMapper _mapper;
     private readonly ILogger<CommunityJoinRequestsBusinessService> _logger;
     private readonly IPermissionsService _permissionsService;
+    private readonly IUserActivitiesBusinessService _userActivitiesBusinessService;
+    private readonly INotificationsBusinessService _notificationsBusinessService;
 
     public CommunityJoinRequestsBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
         ILogger<CommunityJoinRequestsBusinessService> logger,
-        IPermissionsService permissionsService) : base(httpContextAccessor)
+        IPermissionsService permissionsService,
+        IUserActivitiesBusinessService userActivitiesBusinessService,
+        INotificationsBusinessService notificationsBusinessService) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
         _permissionsService = permissionsService;
+        _userActivitiesBusinessService = userActivitiesBusinessService;
+        _notificationsBusinessService = notificationsBusinessService;
     }
 
     public async Task JoinCommunityAsync(Guid communityId, CancellationToken cancellationToken)
@@ -50,6 +56,8 @@ public class CommunityJoinRequestsBusinessService : BaseBusinessService, ICommun
             
             await _unitOfWork.CommunityMembersRepository.AddAsync(communityMember, cancellationToken);
             
+            await _userActivitiesBusinessService.LogActivityAsync(ActivityType.JoinCommunity, "Вступление в сообщество", communityId, cancellationToken);
+            
             _logger.LogInformation("Community member successfully joined.");
 
             return;
@@ -62,6 +70,8 @@ public class CommunityJoinRequestsBusinessService : BaseBusinessService, ICommun
         };
 
         await _unitOfWork.CommunityJoinRequestsRepository.AddAsync(communityJoinRequest, cancellationToken);
+        
+        await _userActivitiesBusinessService.LogActivityAsync(ActivityType.SendJoinRequest, "Запрос на вступление в сообщество", communityId, cancellationToken);
         
         _logger.LogInformation("Community join request successfully sent.");
     }
@@ -122,6 +132,8 @@ public class CommunityJoinRequestsBusinessService : BaseBusinessService, ICommun
             
             await _unitOfWork.CommunityMembersRepository.AddAsync(member,cancellationToken);
         }
+        
+        await _notificationsBusinessService.SendNotificationAsync(entity.UserId, NotificationType.JoinRequestStatusChanged, $"Статус вашего запроса: {status}", NotificationSource.Community, entity.CommunityId, UserId, cancellationToken);
         
         _logger.LogInformation("Community join request successfully changed.");
     }

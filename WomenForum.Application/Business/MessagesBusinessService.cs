@@ -8,6 +8,7 @@ using WomenForum.Helpers.Interfaces;
 using WomenForum.Models;
 using WomenForum.Models.Requests;
 using WomenForum.Repository;
+using WomenForum.Domain.Enums;
 
 namespace WomenForum.Business;
 
@@ -17,18 +18,24 @@ public class MessagesBusinessService : BaseBusinessService, IMessagesBusinessSer
     private readonly IMapper _mapper;
     private readonly ILogger<MessagesBusinessService> _logger;
     private readonly IPermissionsService _permissionsService;
+    private readonly IUserActivitiesBusinessService _userActivitiesBusinessService;
+    private readonly INotificationsBusinessService _notificationsBusinessService;
 
     public MessagesBusinessService(
         IHttpContextAccessor httpContextAccessor,
         IUnitOfWork unitOfWork,
         IMapper mapper,
         ILogger<MessagesBusinessService> logger,
-        IPermissionsService permissionsService) : base(httpContextAccessor)
+        IPermissionsService permissionsService,
+        IUserActivitiesBusinessService userActivitiesBusinessService,
+        INotificationsBusinessService notificationsBusinessService) : base(httpContextAccessor)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _logger = logger;
         _permissionsService = permissionsService;
+        _userActivitiesBusinessService = userActivitiesBusinessService;
+        _notificationsBusinessService = notificationsBusinessService;
     }
 
     public async Task<MessageDto> AddMessageAsync(Guid threadId, CreateMessageRequest request, CancellationToken cancellationToken)
@@ -46,6 +53,17 @@ public class MessagesBusinessService : BaseBusinessService, IMessagesBusinessSer
         entity.CreatedById = UserId;
         
         await _unitOfWork.MessagesRepository.AddAsync(entity, cancellationToken);
+        
+        await _userActivitiesBusinessService.LogActivityAsync(ActivityType.Message, "Отправлено сообщение", entity.Id, cancellationToken);
+        
+        if (entity.ParentMessageId != null)
+        {
+            var parentMessage = await _unitOfWork.MessagesRepository.GetByIdAsync(entity.ParentMessageId.Value, cancellationToken);
+            if (parentMessage != null)
+            {
+                await _notificationsBusinessService.SendNotificationAsync(parentMessage.CreatedById, NotificationType.ReplyAdded, "Вам ответили", NotificationSource.Message, entity.Id, UserId, cancellationToken);
+            }
+        }
         
         _logger.LogInformation("Message successfully added");
         

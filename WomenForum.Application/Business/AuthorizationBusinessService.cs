@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Templates.Business;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Enums;
@@ -8,6 +8,7 @@ using WomenForum.Helpers;
 using WomenForum.Models;
 using WomenForum.Models.Requests;
 using WomenForum.Repository;
+using WomenForum.Repository.Repositories.Interfaces;
 
 namespace WomenForum.Business;
 
@@ -15,7 +16,8 @@ public class AuthorizationBusinessService(
     JWTHelper jwtHelper,
     IUnitOfWork unitOfWork,
     IMapper mapper,
-    IHttpContextAccessor httpContextAccessor)
+    IHttpContextAccessor httpContextAccessor,
+    IUserActivitiesRepository userActivitiesRepository)
     : BaseBusinessService(httpContextAccessor), IAuthorizationBusinessService
 {
     public async Task<AuthorizationResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
@@ -40,6 +42,13 @@ public class AuthorizationBusinessService(
 
         user.LastLogin = DateTime.UtcNow;
         await unitOfWork.UsersRepository.UpdateAsync(user, cancellationToken);
+        
+        await userActivitiesRepository.AddAsync(new UserActivity
+        {
+            UserId = user.Id,
+            Type = ActivityType.Login,
+            Description = "Вход в систему",
+        }, cancellationToken);
 
         var token = jwtHelper.GenerateToken(user.Id,user.Username,user.Role);
 

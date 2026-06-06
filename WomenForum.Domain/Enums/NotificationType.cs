@@ -7,5 +7,6 @@ public enum NotificationType
     CommentAdded,
     ReplyAdded,
     JoinRequestStatusChanged,
-    ReportStatusChanged
+    ReportStatusChanged,
+    Announcement
 }

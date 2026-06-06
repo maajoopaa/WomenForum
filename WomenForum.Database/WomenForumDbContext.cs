@@ -14,6 +14,7 @@ public class WomenForumDbContext(DbContextOptions<WomenForumDbContext> options) 
     public DbSet<Like> Likes { get; set; }
     public DbSet<Message> Messages { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<UserActivity> UserActivities { get; set; }
     public DbSet<Post> Posts { get; set; }
     public DbSet<Report> Reports { get; set; }
     public DbSet<Subscription> Subscriptions { get; set; }
