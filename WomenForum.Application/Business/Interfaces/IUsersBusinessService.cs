@@ -17,4 +17,5 @@ public interface IUsersBusinessService : IBaseBusinessService
     public Task<PagedResult<UserDto>> GetAllUsersAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken);
     public Task<UserDto> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken);
     public Task ChangeUserBanStatus(Guid userId, bool isBanned, CancellationToken cancellationToken);
+    public Task ChangeUserRole(Guid userId, Role role, CancellationToken cancellationToken);
 }

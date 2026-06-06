@@ -17,17 +17,20 @@ public class UsersController : ControllerBase
     private readonly ICommunitiesBusinessService _communitiesBusinessService;
     private readonly IPostsBusinessService _postsBusinessService;
     private readonly IUserSettingsBusinessService _userSettingsBusinessService;
+    private readonly IUserActivitiesBusinessService _userActivitiesBusinessService;
 
     public UsersController(
         IUsersBusinessService usersBusinessService,
         ICommunitiesBusinessService communitiesBusinessService,
         IPostsBusinessService postsBusinessService,
-        IUserSettingsBusinessService userSettingsBusinessService)
+        IUserSettingsBusinessService userSettingsBusinessService,
+        IUserActivitiesBusinessService userActivitiesBusinessService)
     {
         _usersBusinessService = usersBusinessService;
         _communitiesBusinessService = communitiesBusinessService;
         _postsBusinessService = postsBusinessService;
         _userSettingsBusinessService = userSettingsBusinessService;
+        _userActivitiesBusinessService = userActivitiesBusinessService;
     }
     
     [Authorize]
@@ -145,6 +148,24 @@ public class UsersController : ControllerBase
         CancellationToken cancellationToken)
     {
         await _usersBusinessService.ChangeUserBanStatus(userId, isBanned, cancellationToken);
+
+        return NoContent();
+    }
+    
+    [Authorize]
+    [HttpGet("{userId:guid}/activities")]
+    public async Task<ActionResult<PagedResult<UserActivityDto>>> GetActivitiesByIdAsync(Guid userId, [FromQuery] PaginationParameters paginationParameters, CancellationToken cancellationToken)
+    {
+        var result = await _userActivitiesBusinessService.GetUserActivitiesByIdAsync(userId, paginationParameters, cancellationToken);
+        return Ok(result);
+    }
+
+    [Authorize]
+    [HttpPatch("{userId:guid}/role")]
+    public async Task<ActionResult> ChangeUserRoleAsync(Guid userId, [FromQuery] Role role,
+        CancellationToken cancellationToken)
+    {
+        await _usersBusinessService.ChangeUserRole(userId, role, cancellationToken);
 
         return NoContent();
     }

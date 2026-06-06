@@ -23,4 +23,6 @@ public class Post : BaseDbEntityWithId
     public virtual List<Like> Likes { get; set; } = [];
 
     public virtual List<Comment> Comments { get; set; } = [];
+
+    public virtual List<Image> PinnedImages { get; set; } = [];
 }

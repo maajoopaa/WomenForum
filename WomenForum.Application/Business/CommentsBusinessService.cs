@@ -83,6 +83,8 @@ public class CommentsBusinessService : BaseBusinessService, ICommentsBusinessSer
         
         await _unitOfWork.CommentsRepository.UpdateAsync(entity, cancellationToken);
         
+        await _userActivitiesBusinessService.LogActivityAsync(ActivityType.Comment, "Обновлен комментарий", entity.Id, cancellationToken);
+        
         _logger.LogInformation("Comment successfully updated");
     }
 
@@ -104,6 +106,8 @@ public class CommentsBusinessService : BaseBusinessService, ICommentsBusinessSer
         }
 
         await _unitOfWork.CommentsRepository.DeleteAsync(entity, cancellationToken);
+        
+        await _userActivitiesBusinessService.LogActivityAsync(ActivityType.Comment, "Удален комментарий", entity.Id, cancellationToken);
         
         _logger.LogInformation("Comment successfully deleted");
     }

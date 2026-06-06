@@ -4,6 +4,7 @@ using Templates.Models;
 using WomenForum.Business.Interfaces;
 using WomenForum.Domain.Enums;
 using WomenForum.Domain.Models;
+using WomenForum.Exceptions;
 using WomenForum.Models;
 using WomenForum.Repository;
 
@@ -26,16 +27,24 @@ public class UserActivitiesBusinessService : BaseBusinessService, IUserActivitie
         _logger = logger;
     }
 
-    public async Task<PagedResult<UserActivityDto>> GetMyActivitiesAsync(PaginationParameters paginationParameters, CancellationToken cancellationToken)
+    public async Task<PagedResult<UserActivityDto>> GetUserActivitiesByIdAsync(Guid userId, PaginationParameters paginationParameters, CancellationToken cancellationToken)
     {
+        var currentUser = await _unitOfWork.UsersRepository.GetByIdAsync(UserId,cancellationToken);
+
+        if (currentUser?.Role != Role.Administrator)
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+        
         var pagedEntities = await _unitOfWork.UserActivitiesRepository.GetPagedAsync(
-            x => x.UserId == UserId, 
+            x => x.UserId == userId,
             paginationParameters.PageNumber, 
             paginationParameters.PageSize, 
             cancellationToken);
 
         return new PagedResult<UserActivityDto>(
-            _mapper.Map<List<UserActivityDto>>(pagedEntities.Items),
+            _mapper.Map<List<UserActivityDto>>(pagedEntities.Items, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize

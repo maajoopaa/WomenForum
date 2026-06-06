@@ -40,7 +40,8 @@ public class NotificationsBusinessService : BaseBusinessService, INotificationsB
         var orderedItems = pagedEntities.Items.OrderByDescending(x => x.CreatedAt).ToList();
 
         return new PagedResult<NotificationDto>(
-            _mapper.Map<List<NotificationDto>>(orderedItems),
+            _mapper.Map<List<NotificationDto>>(orderedItems, opts => 
+                opts.Items["CurrentUserId"] = UserId),
             pagedEntities.TotalCount,
             pagedEntities.PageNumber,
             pagedEntities.PageSize
@@ -71,8 +72,12 @@ public class NotificationsBusinessService : BaseBusinessService, INotificationsB
 
     public async Task SendGlobalNotificationAsync(CreateGlobalNotificationRequest request, CancellationToken cancellationToken)
     {
-        // To avoid timing out, ideally we would do this in a background job if the user base is huge. 
-        // For now, we will do it sequentially or in chunks.
+        var currentUser = await _unitOfWork.UsersRepository.GetByIdAsync(UserId,cancellationToken);
+
+        if (currentUser?.Role != Role.Administrator)
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
         
         var allUsers = await _unitOfWork.UsersRepository.GetAsync(x => x.DeletedAt == null, cancellationToken);
         
@@ -84,7 +89,6 @@ public class NotificationsBusinessService : BaseBusinessService, INotificationsB
             TriggeredById = UserId
         }).ToList();
 
-        // Assuming AddAsync can be called in a loop or we could add AddRangeAsync if it existed.
         foreach (var notification in notifications)
         {
             await _unitOfWork.NotificationsRepository.AddAsync(notification, cancellationToken);

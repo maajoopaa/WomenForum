@@ -35,7 +35,7 @@ public class NotificationsController : ControllerBase
         return NoContent();
     }
 
-    [Authorize(Roles = "Administrator")]
+    [Authorize]
     [HttpPost("global")]
     public async Task<ActionResult> SendGlobalNotificationAsync([FromBody] CreateGlobalNotificationRequest request, CancellationToken cancellationToken)
     {

@@ -11,6 +11,8 @@ public class NotificationDto : BaseDtoWithId
 
     public Guid? TargetId { get; set; }
     public NotificationSource? Source { get; set; }
+
+    public string Message { get; set; } = null!;
     
     public NotificationType Type { get; set; }
 

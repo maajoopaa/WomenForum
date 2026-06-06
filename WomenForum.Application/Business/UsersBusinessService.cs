@@ -222,4 +222,25 @@ public class UsersBusinessService : BaseBusinessService, IUsersBusinessService
 
         await _unitOfWork.UsersRepository.UpdateAsync(entity, cancellationToken);
     }
+
+    public async Task ChangeUserRole(Guid userId, Role role, CancellationToken cancellationToken)
+    {
+        var currentUser = await _unitOfWork.UsersRepository.GetByIdAsync(UserId,cancellationToken);
+
+        if (currentUser?.Role != Role.Administrator)
+        {
+            throw new NoPermissionException("У вас недостаточно прав для этого действия.");
+        }
+
+        var entity = await _unitOfWork.UsersRepository.GetByIdAsync(userId, cancellationToken);
+
+        if (entity == null)
+        {
+            throw new NotFoundException($"Пользователь {userId} не найден.");
+        }
+
+        entity.Role = role;
+
+        await _unitOfWork.UsersRepository.UpdateAsync(entity, cancellationToken);
+    }
 }
