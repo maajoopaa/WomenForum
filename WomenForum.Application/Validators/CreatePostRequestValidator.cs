@@ -12,7 +12,6 @@ public class CreatePostRequestValidator : AbstractValidator<CreatePostRequest>
             .MaximumLength(200).WithMessage(ValidationMessages.MaxLength);
 
         RuleFor(x => x.HtmlContent)
-            .NotEmpty().WithMessage(ValidationMessages.Required)
-            .MaximumLength(10000).WithMessage(ValidationMessages.MaxLength);
+            .NotEmpty().WithMessage(ValidationMessages.Required);
     }
 }

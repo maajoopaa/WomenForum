@@ -68,6 +68,14 @@ public class CommunityJoinRequestsBusinessService : BaseBusinessService, ICommun
             CommunityId = communityId,
             UserId = UserId,
         };
+        
+        var existingJoinRequest = await _unitOfWork.CommunityJoinRequestsRepository
+            .FirstOrDefaultAsync(x => x.CommunityId == communityId && x.UserId == UserId, cancellationToken);
+
+        if (existingJoinRequest != null)
+        {
+            return;
+        }
 
         await _unitOfWork.CommunityJoinRequestsRepository.AddAsync(communityJoinRequest, cancellationToken);
         
